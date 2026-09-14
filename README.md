@@ -4,7 +4,8 @@ A simplified insurance **quote → policy → claim** application, built for the
 TalentPath Academy **AI-Powered SDLC Workshop** — small enough to read in an hour, real enough to
 write tests, find bugs and deploy.
 
-**This is the starter repo.** Customers, products, the database, the screens and the theme are done.
+**This is the starter repo.** The app has **11 pages — 8 are given, 3 you build** (see the Screens table below
+and [docs/scenarios.md](docs/scenarios.md)). The database, models, theme and the given screens are done.
 You build the rest, lab by lab — every TODO is marked in the code:
 
 | Lab | Where | What you build |
@@ -12,12 +13,16 @@ You build the rest, lab by lab — every TODO is marked in the code:
 | Lab 4 | `app/services/pricing.py` | the premium calculator (4 small functions) |
 | Lab 4 | `app/routers/quotes.py` | `price_quote` + `POST /api/quotes` |
 | Lab 4 | `app/routers/policies.py` | `issue_policy` + `PATCH /api/policies/{id}/status` |
+| Lab 4 | `app/routers/pages.py` + `app/templates/quotes.html` | **Scenario 1 — Quotes list page** |
+| Homework | `app/routers/pages.py` + `app/templates/customer_detail.html` | **Scenario 2 — Customer 360 page** |
 | Lab 5 | `tests/test_pricing.py` | pytest for the premium rules and edge cases |
 | Lab 6 | `git checkout bugs` | find and fix 5 seeded bugs, refactor, AI code review |
 | Lab 7 | `README.md`, Render | docs + deploy + read the logs |
 | Final | `app/services/claims.py`, `app/routers/claims.py`, `tests/test_claims.py` | the Claims module |
+| Final | `app/routers/pages.py` + `app/templates/claim_detail.html` | **Scenario 3 — Claim review page** |
 
-Search the code for `TODO` to find every spot. Behind? `git checkout day1-complete` has Lab 4 finished.
+Search the code for `TODO` to find every spot. In the app, the three student pages show a placeholder with
+the brief until you replace them. Behind? `git checkout day1-complete` has Lab 4 + Scenario 1 finished.
 
 | Stack | |
 |---|---|
@@ -96,7 +101,21 @@ premium = sum_insured x base_rate x age_factor x tenure_factor x add_on_factor  
 | PATCH | `/api/claims/{id}/status` | move a claim through its workflow |
 | GET | `/health` | liveness check |
 
-Screens: `/` dashboard · `/quotes/new` · `/quotes/{id}` (issue policy) · `/policies` · `/policies/{id}` (file & review claims) · `/claims` · `/customers`
+## Screens (11 pages)
+
+| # | Page | Route | Status |
+|---|---|---|---|
+| 1 | Dashboard | `/` | given |
+| 2 | Customers | `/customers` | given |
+| 3 | Customer 360 | `/customers/{id}` | **you build — Scenario 2** |
+| 4 | Products | `/products` | given |
+| 5 | Get a quote | `/quotes/new` | given (pricing = Lab 4) |
+| 6 | Quote detail / issue policy | `/quotes/{id}` | given |
+| 7 | Quotes list | `/quotes` | **you build — Scenario 1** |
+| 8 | Policies | `/policies` | given |
+| 9 | Policy detail / file claim | `/policies/{id}` | given |
+| 10 | Claims | `/claims` | given |
+| 11 | Claim review | `/claims/{id}` | **you build — Scenario 3** |
 
 ## Project layout
 
@@ -113,7 +132,7 @@ app/
   static/              theme.css · app.js · favicon.svg
 tests/                 pytest suite (you add test_pricing.py, test_claims.py, ...)
 data/                  seed CSVs
-docs/                  prompt cheat-sheet, final-project brief, rubric
+docs/                  prompt cheat-sheet, scenarios (3 student pages), final-project brief, rubric
 ```
 
 ## Deploy to Render

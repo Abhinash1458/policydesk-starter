@@ -29,7 +29,7 @@ from app.routers.claims import file_claim, update_claim_status
 from app.routers.policies import issue_policy
 from app.routers.quotes import price_quote
 from app.services import pricing
-from app.services.claims import remaining_cover
+from app.services.claims import ALLOWED_TRANSITIONS, remaining_cover  # noqa: F401  (ALLOWED_TRANSITIONS: Scenario 3)
 
 router = APIRouter(include_in_schema=False)
 templates = Jinja2Templates(directory=Path(__file__).resolve().parent.parent / "templates")
@@ -104,17 +104,69 @@ def dashboard(request: Request, session: Session = Depends(get_session)):
 
 
 # --------------------------------------------------------------------------- #
+# Products (given)
+# --------------------------------------------------------------------------- #
+@router.get("/products", response_class=HTMLResponse)
+def products_page(request: Request, session: Session = Depends(get_session)):
+    products = session.exec(select(Product).order_by(Product.id)).all()
+    policy_counts = dict(
+        session.exec(select(Policy.product_id, func.count(Policy.id)).group_by(Policy.product_id)).all()
+    )
+    return render(request, "products.html", products=products, add_ons=pricing.ADD_ONS, policy_counts=policy_counts)
+
+
+# --------------------------------------------------------------------------- #
+# Student scenarios — see docs/scenarios.md. Replace each placeholder with the real page.
+# --------------------------------------------------------------------------- #
+SCENARIOS = {
+    1: ("Quotes list", "/quotes", "quotes.html",
+        "Every quote, Open vs Converted, filter by product, 'Issue policy' button for open quotes."),
+    2: ("Customer 360", "/customers/{id}", "customer_detail.html",
+        "Profile, totals, and every quote / policy / claim for one customer. 'New quote' button pre-selects them."),
+    3: ("Claim review", "/claims/{id}", "claim_detail.html",
+        "Claim + policy context, remaining cover, and only the allowed next actions with a reason box."),
+}
+
+
+def scenario_placeholder(request: Request, number: int):
+    title, route, template, summary = SCENARIOS[number]
+    return render(request, "scenario_todo.html", number=number, title=title, route=route,
+                  template=template, summary=summary)
+
+
+@router.get("/quotes", response_class=HTMLResponse)
+def quotes_list(request: Request, session: Session = Depends(get_session)):
+    """SCENARIO 1 — Quotes list. TODO: query quotes (filter ?status=open|converted, ?product=CODE),
+    render quotes.html. Delete the placeholder line when done."""
+    return scenario_placeholder(request, 1)
+
+
+@router.get("/customers/{customer_id}", response_class=HTMLResponse)
+def customer_detail(request: Request, customer_id: int, session: Session = Depends(get_session)):
+    """SCENARIO 2 — Customer 360. TODO: session.get(Customer, id) (404 if missing), collect their quotes,
+    policies and claims, render customer_detail.html."""
+    return scenario_placeholder(request, 2)
+
+
+@router.get("/claims/{claim_id}", response_class=HTMLResponse)
+def claim_detail(request: Request, claim_id: int, session: Session = Depends(get_session)):
+    """SCENARIO 3 — Claim review. TODO: session.get(Claim, id) (404 if missing), remaining cover, allowed next
+    states from ALLOWED_TRANSITIONS, render claim_detail.html."""
+    return scenario_placeholder(request, 3)
+
+
+# --------------------------------------------------------------------------- #
 # Quote -> Policy
 # --------------------------------------------------------------------------- #
 @router.get("/quotes/new", response_class=HTMLResponse)
-def quote_form(request: Request, session: Session = Depends(get_session)):
+def quote_form(request: Request, customer_id: int | None = None, session: Session = Depends(get_session)):
     return render(
         request,
         "quote.html",
         customers=session.exec(select(Customer).order_by(Customer.name)).all(),
         products=session.exec(select(Product)).all(),
         add_ons=pricing.ADD_ONS,
-        form={},
+        form={"customer_id": customer_id} if customer_id else {},
     )
 
 
@@ -266,12 +318,13 @@ def claim_status(
     claim_id: int,
     status: ClaimStatus = Form(...),
     reason: str = Form(""),
+    back: str = Form(""),
     session: Session = Depends(get_session),
 ):
     claim = session.get(Claim, claim_id)
     if not claim:
         raise HTTPException(404, "Claim not found")
-    back = f"/policies/{claim.policy_id}"
+    back = back if back.startswith("/") else f"/policies/{claim.policy_id}"
     try:
         update_claim_status(claim_id, ClaimStatusUpdate(status=status, reason=reason or None), session)
     except HTTPException as exc:

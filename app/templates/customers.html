@@ -22,12 +22,12 @@
           <tbody>
           {% for c in customers %}
             <tr>
-              <td><b>{{ c.name }}</b></td>
+              <td><a href="/customers/{{ c.id }}"><b>{{ c.name }}</b></a></td>
               <td class="small">{{ c.email }}</td>
               <td class="small mono">{{ c.phone }}</td>
               <td class="small">{{ c.date_of_birth.strftime('%d %b %Y') }}</td>
               <td class="num">{{ age_on(c.date_of_birth) }}</td>
-              <td><a class="btn btn--ghost btn--sm" href="/quotes/new">Quote</a></td>
+              <td style="white-space:nowrap"><a class="btn btn--ghost btn--sm" href="/customers/{{ c.id }}">View</a> <a class="btn btn--ghost btn--sm" href="/quotes/new?customer_id={{ c.id }}">Quote</a></td>
             </tr>
           {% endfor %}
           </tbody>

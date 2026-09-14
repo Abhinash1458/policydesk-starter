@@ -22,17 +22,18 @@
     <div class="card" style="padding:0">
       {% if claims %}
       <div class="table-wrap"><table>
-        <thead><tr><th>#</th><th>Policy</th><th>Customer</th><th>Incident</th><th>Description</th><th class="num">Amount</th><th>Status</th></tr></thead>
+        <thead><tr><th>#</th><th>Policy</th><th>Customer</th><th>Incident</th><th>Description</th><th class="num">Amount</th><th>Status</th><th></th></tr></thead>
         <tbody>
         {% for c in claims %}
           <tr>
-            <td class="mono">{{ c.id }}</td>
+            <td class="mono"><a href="/claims/{{ c.id }}">{{ c.id }}</a></td>
             <td><a class="mono" href="/policies/{{ c.policy_id }}">{{ c.policy.policy_number }}</a></td>
-            <td>{{ c.policy.customer.name }}</td>
+            <td><a href="/customers/{{ c.policy.customer_id }}">{{ c.policy.customer.name }}</a></td>
             <td class="small">{{ c.incident_date.strftime('%d %b %Y') }}</td>
             <td class="small">{{ c.description }}{% if c.reason %}<br><span class="muted">Reason: {{ c.reason }}</span>{% endif %}</td>
             <td class="num">{{ c.amount | money }}</td>
             <td>{{ pill(c.status) }}</td>
+            <td><a class="btn btn--ghost btn--sm" href="/claims/{{ c.id }}">Review</a></td>
           </tr>
         {% endfor %}
         </tbody>

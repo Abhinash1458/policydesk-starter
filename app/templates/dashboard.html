@@ -28,7 +28,7 @@
 
     <div class="grid grid--4" style="margin-bottom:24px">
       <div class="card stat"><span class="icon-badge">👤</span><div><div class="stat__label">Customers</div><div class="stat__value">{{ counts.customers }}</div><div class="stat__hint"><a href="/customers">Manage →</a></div></div></div>
-      <div class="card stat"><span class="icon-badge">🧮</span><div><div class="stat__label">Quotes</div><div class="stat__value">{{ counts.quotes }}</div><div class="stat__hint"><a href="/quotes/new">New quote →</a></div></div></div>
+      <div class="card stat"><span class="icon-badge">🧮</span><div><div class="stat__label">Quotes</div><div class="stat__value">{{ counts.quotes }}</div><div class="stat__hint"><a href="/quotes">All quotes →</a></div></div></div>
       <div class="card stat"><span class="icon-badge">🛡️</span><div><div class="stat__label">Claims filed</div><div class="stat__value">{{ counts.claims }}</div><div class="stat__hint"><a href="/claims">Review →</a></div></div></div>
       <div class="card stat"><span class="icon-badge">💸</span><div><div class="stat__label">Claims paid</div><div class="stat__value">{{ claims_approved | money }}</div><div class="stat__hint">approved total</div></div></div>
     </div>
@@ -74,7 +74,7 @@
           <ul style="display:grid;gap:10px">
             {% for c in recent_claims %}
             <li style="display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:.9rem">
-              <span><a class="mono" href="/policies/{{ c.policy_id }}">{{ c.policy.policy_number }}</a><br><span class="muted small">{{ c.description[:40] }}</span></span>
+              <span><a class="mono" href="/claims/{{ c.id }}">#{{ c.id }}</a> · <a class="mono small" href="/policies/{{ c.policy_id }}">{{ c.policy.policy_number }}</a><br><span class="muted small">{{ c.description[:40] }}</span></span>
               <span style="text-align:right"><b>{{ c.amount | money }}</b><br>{{ pill(c.status) }}</span>
             </li>
             {% endfor %}

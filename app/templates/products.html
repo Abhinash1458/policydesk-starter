@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <div>
+      <span class="eyebrow">Catalogue</span>
+      <h1>Insurance <span class="hl">products</span></h1>
+      <p>Three products, each with a base rate and sum-insured limits. Add-ons load the premium.</p>
+    </div>
+    <a class="btn btn--primary" href="/quotes/new">Get a quote</a>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="grid grid--3">
+      {% set icons = {'HEALTH': '🏥', 'MOTOR': '🚗', 'TERM_LIFE': '🛡️'} %}
+      {% for p in products %}
+      <div class="card" style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="icon-badge icon-badge--grad">{{ icons.get(p.code.value, '📄') }}</span>
+          <div>
+            <div style="font-family:var(--font-display);font-weight:800;font-size:1.1rem">{{ p.name }}</div>
+            <span class="pill pill--brand pill--plain">{{ p.code.value }}</span>
+          </div>
+        </div>
+        <p class="small muted">{{ p.description }}</p>
+        <dl class="kv small">
+          <dt>Base rate</dt><dd>{{ (p.base_rate * 100) | round(2) }}% of sum insured / year</dd>
+          <dt>Sum insured</dt><dd>{{ p.min_sum_insured | money }} – {{ p.max_sum_insured | money }}</dd>
+          <dt>Add-ons</dt>
+          <dd>
+            {% set ons = add_ons.get(p.code, {}) %}
+            {% if ons %}{% for name, pct in ons.items() %}<span class="pill pill--plain">{{ name.replace('_',' ').title() }} +{{ (pct*100)|int }}%</span> {% endfor %}
+            {% else %}<span class="muted">None</span>{% endif %}
+          </dd>
+          <dt>Policies</dt><dd>{{ policy_counts.get(p.id, 0) }} issued</dd>
+        </dl>
+        <a class="btn btn--ghost btn--sm" href="/quotes/new" style="align-self:flex-start;margin-top:auto">Quote {{ p.name }} →</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
