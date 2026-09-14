@@ -24,6 +24,9 @@ You build the rest, lab by lab — every TODO is marked in the code:
 Search the code for `TODO` to find every spot. In the app, the three student pages show a placeholder with
 the brief until you replace them. Behind? `git checkout day1-complete` has Lab 4 + Scenario 1 finished.
 
+**Start here:** [docs/prompt-guide.md](docs/prompt-guide.md) has a ready-to-use prompt for every task above,
+in order, with what to paste and what to check. Log what the AI gets wrong in [docs/ai-log.md](docs/ai-log.md).
+
 | Stack | |
 |---|---|
 | Backend | Python 3.12+ · FastAPI · SQLModel (SQLite) |
@@ -132,7 +135,7 @@ app/
   static/              theme.css · app.js · favicon.svg
 tests/                 pytest suite (you add test_pricing.py, test_claims.py, ...)
 data/                  seed CSVs
-docs/                  prompt cheat-sheet, scenarios (3 student pages), final-project brief, rubric
+docs/                  prompt-guide (lab-by-lab prompts), prompts (cheat-sheet), scenarios, final-project brief, rubric, ai-log
 ```
 
 ## Deploy to Render
