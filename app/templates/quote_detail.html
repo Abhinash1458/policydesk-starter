@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% from "_macros.html" import alerts %}
+{% block title %}Quote #{{ quote.id }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <div>
+      <span class="eyebrow">Step 2 of 3</span>
+      <h1>Quote <span class="hl">#{{ quote.id }}</span></h1>
+      <p>Review the premium, then issue the policy.</p>
+    </div>
+    <div class="steps">
+      <span class="step done">1 · Quote</span><span class="arrow">→</span>
+      <span class="step on">2 · Policy</span><span class="arrow">→</span>
+      <span class="step">3 · Claim</span>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    {{ alerts(error=error) }}
+    <div class="grid grid--side">
+      <div style="display:grid;gap:20px">
+        <div class="premium-box">
+          <div class="label">Annual premium</div>
+          <div class="value">{{ quote.premium | money }} <small>/ year</small></div>
+          <div class="small" style="opacity:.9">{{ quote.product.name }} · Sum insured {{ quote.sum_insured | money }} · {{ quote.tenure_years }} year{{ 's' if quote.tenure_years > 1 }}</div>
+        </div>
+        <div class="card">
+          <div class="card__title"><span class="icon-badge">🧾</span> Quote details</div>
+          <dl class="kv">
+            <dt>Customer</dt><dd>{{ quote.customer.name }} <span class="muted">· age {{ age }}</span></dd>
+            <dt>Email</dt><dd>{{ quote.customer.email }}</dd>
+            <dt>Product</dt><dd>{{ quote.product.name }} <span class="pill pill--brand pill--plain">{{ quote.product.code.value }}</span></dd>
+            <dt>Base rate</dt><dd>{{ quote.product.base_rate }}</dd>
+            <dt>Sum insured</dt><dd>{{ quote.sum_insured | money }}</dd>
+            <dt>Tenure</dt><dd>{{ quote.tenure_years }} year{{ 's' if quote.tenure_years > 1 }}</dd>
+            <dt>Add-ons</dt><dd>{% if add_on_list %}{% for a in add_on_list %}<span class="pill pill--plain">{{ a.replace('_',' ').title() }}</span> {% endfor %}{% else %}<span class="muted">None</span>{% endif %}</dd>
+            <dt>Created</dt><dd>{{ quote.created_at.strftime('%d %b %Y, %H:%M') }}</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="card">
+        {% if quote.policy %}
+        <div class="card__title"><span class="icon-badge icon-badge--grad">✅</span> Policy issued</div>
+        <p class="small muted" style="margin-bottom:14px">This quote has already been converted.</p>
+        <a class="btn btn--primary" href="/policies/{{ quote.policy.id }}">Open {{ quote.policy.policy_number }} →</a>
+        {% else %}
+        <div class="card__title"><span class="icon-badge icon-badge--grad">📄</span> Issue policy</div>
+        <form class="form" method="post" action="/quotes/{{ quote.id }}/issue">
+          <div class="field">
+            <label for="start_date">Policy start date</label>
+            <input type="date" name="start_date" id="start_date" value="{{ today().isoformat() }}" required>
+            <span class="hint">Ends {{ quote.tenure_years }} year{{ 's' if quote.tenure_years > 1 }} later, minus one day.</span>
+          </div>
+          {% if quote.product.code.value == 'MOTOR' %}
+          <div class="field">
+            <label for="vehicle_registration">Vehicle registration number</label>
+            <input type="text" name="vehicle_registration" id="vehicle_registration" placeholder="e.g. TS09AB1234" required style="text-transform:uppercase">
+            <span class="hint">Required for Motor policies.</span>
+          </div>
+          {% endif %}
+          <div class="form__actions">
+            <button class="btn btn--accent" type="submit">Issue policy →</button>
+            <a class="btn btn--ghost" href="/quotes/new">New quote</a>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

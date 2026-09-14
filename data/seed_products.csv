@@ -1,0 +1,4 @@
+code,name,description,base_rate,min_sum_insured,max_sum_insured
+HEALTH,Health Shield,Hospitalisation cover for individuals. Optional Critical Illness add-on.,0.030,100000,5000000
+MOTOR,Motor Secure,Comprehensive private-car cover. Optional Zero Depreciation add-on.,0.025,50000,3000000
+TERM_LIFE,Term Life Plus,Pure term life cover paid to the nominee. No add-ons.,0.004,500000,50000000

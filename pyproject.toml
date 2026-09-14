@@ -1,0 +1,13 @@
+[project]
+name = "policydesk"
+version = "1.0.0"
+description = "PolicyDesk starter — TalentPath Academy AI-Powered SDLC Workshop"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 120

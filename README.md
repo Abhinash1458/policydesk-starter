@@ -1,0 +1,129 @@
+# PolicyDesk — starter
+
+A simplified insurance **quote → policy → claim** application, built for the
+TalentPath Academy **AI-Powered SDLC Workshop** — small enough to read in an hour, real enough to
+write tests, find bugs and deploy.
+
+**This is the starter repo.** Customers, products, the database, the screens and the theme are done.
+You build the rest, lab by lab — every TODO is marked in the code:
+
+| Lab | Where | What you build |
+|---|---|---|
+| Lab 4 | `app/services/pricing.py` | the premium calculator (4 small functions) |
+| Lab 4 | `app/routers/quotes.py` | `price_quote` + `POST /api/quotes` |
+| Lab 4 | `app/routers/policies.py` | `issue_policy` + `PATCH /api/policies/{id}/status` |
+| Lab 5 | `tests/test_pricing.py` | pytest for the premium rules and edge cases |
+| Lab 6 | `git checkout bugs` | find and fix 5 seeded bugs, refactor, AI code review |
+| Lab 7 | `README.md`, Render | docs + deploy + read the logs |
+| Final | `app/services/claims.py`, `app/routers/claims.py`, `tests/test_claims.py` | the Claims module |
+
+Search the code for `TODO` to find every spot. Behind? `git checkout day1-complete` has Lab 4 finished.
+
+| Stack | |
+|---|---|
+| Backend | Python 3.12+ · FastAPI · SQLModel (SQLite) |
+| UI | Jinja2 templates + vanilla CSS/JS (TalentPath Academy theme) |
+| Tests | pytest + FastAPI TestClient |
+| Deploy | Render.com free web service (`render.yaml`) |
+
+## Run it
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+- App: http://127.0.0.1:8000
+- Swagger API docs: http://127.0.0.1:8000/docs
+- Health check: http://127.0.0.1:8000/health
+
+On first start the app creates `policydesk.db` and seeds 3 products and 2 demo customers from `data/`.
+Delete the file to reset.
+
+```bash
+pytest            # run the test suite
+pytest -v         # verbose
+```
+
+## The domain
+
+```
+Customer --+
+           +--> Quote --(issue)--> Policy --(file)--> Claim
+Product  --+
+```
+
+| Table | Key fields |
+|---|---|
+| **Customer** | name, email, phone, date_of_birth |
+| **Product** | code (HEALTH / MOTOR / TERM_LIFE), base_rate, min/max sum insured |
+| **Quote** | customer, product, sum_insured, tenure_years (1–3), add_ons, **premium** |
+| **Policy** | policy_number, start/end date, status (Active / Lapsed / Cancelled), vehicle_registration |
+| **Claim** | policy, amount, description, incident_date, status (Filed → Under Review → Approved / Rejected) |
+
+### Premium rules — `app/services/pricing.py`
+
+```
+premium = sum_insured x base_rate x age_factor x tenure_factor x add_on_factor   (min Rs 1,000)
+```
+
+| Factor | Values |
+|---|---|
+| Age | < 25 → 1.2 Motor / 0.8 Health & Life · 25–45 → 1.0 · 46–60 → 1.3 · > 60 → 1.6 |
+| Tenure | 1 yr → 1.0 · 2 yr → 0.95 · 3 yr → 0.90 |
+| Add-ons | Health `CRITICAL_ILLNESS` +15% · Motor `ZERO_DEPRECIATION` +10% |
+
+### Claim rules — `app/services/claims.py`
+
+1. Policy must be **Active** (Cancelled → claim is stored as auto-**Rejected**; Lapsed → refused)
+2. Incident date must be inside the policy period
+3. Amount ≤ sum insured − already-approved claims
+4. Motor claims need a vehicle registration number
+5. Status flow: Filed → Under Review → Approved / Rejected (Approved and Rejected are final)
+
+## API
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET / POST | `/api/customers` | list / create customers |
+| GET | `/api/products` | list products |
+| GET / POST | `/api/quotes` | list / **calculate & save a quote** |
+| GET / POST | `/api/policies` | list (`?status_filter=`) / **issue a policy from a quote** |
+| PATCH | `/api/policies/{id}/status` | Active / Lapsed / Cancelled |
+| GET / POST | `/api/claims` | list (`?policy_id=`) / **file a claim** |
+| PATCH | `/api/claims/{id}/status` | move a claim through its workflow |
+| GET | `/health` | liveness check |
+
+Screens: `/` dashboard · `/quotes/new` · `/quotes/{id}` (issue policy) · `/policies` · `/policies/{id}` (file & review claims) · `/claims` · `/customers`
+
+## Project layout
+
+```
+app/
+  main.py              FastAPI app, routers, startup seed
+  db.py                engine + session
+  models.py            SQLModel tables + request/response schemas
+  seed.py              loads data/*.csv on first start
+  services/pricing.py  premium rules (pure functions — unit-test these)
+  services/claims.py   claim validation + status transitions
+  routers/             customers · products · quotes · policies · claims · pages (HTML)
+  templates/           Jinja2 screens
+  static/              theme.css · app.js · favicon.svg
+tests/                 pytest suite (you add test_pricing.py, test_claims.py, ...)
+data/                  seed CSVs
+docs/                  prompt cheat-sheet, final-project brief, rubric
+```
+
+## Deploy to Render
+
+1. Push this repo to GitHub.
+2. Render → **New → Blueprint** → pick the repo. `render.yaml` sets the build/start commands.
+3. Open the URL; `/health` should return `{"status": "ok"}`.
+
+Environment variables: `DATABASE_URL` (default `sqlite:///./policydesk.db`), `APP_ENV` (`dev` / `prod`).
+
+---
+
+TalentPath Academy · *Train. Learn. Grow. Succeed.*

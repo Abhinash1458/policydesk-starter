@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}PolicyDesk{% endblock %} · PolicyDesk</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+  {% set path = request.url.path %}
+  <header class="topbar">
+    <div class="container">
+      <a class="logo" href="/">
+        <span class="logo__mark">PD</span>
+        <span>
+          <span class="logo__name">PolicyDesk</span>
+          <span class="logo__sub">TalentPath Academy</span>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="/" class="{{ 'active' if path == '/' }}">Dashboard</a>
+        <a href="/policies" class="{{ 'active' if path.startswith('/policies') }}">Policies</a>
+        <a href="/claims" class="{{ 'active' if path.startswith('/claims') }}">Claims</a>
+        <a href="/customers" class="{{ 'active' if path.startswith('/customers') }}">Customers</a>
+      </nav>
+      <a class="btn btn--primary" href="/quotes/new">Get a quote</a>
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <span><b>PolicyDesk</b> · AI-Powered SDLC Workshop</span>
+      <span>TalentPath Academy · Train. Learn. Grow. Succeed.</span>
+    </div>
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>

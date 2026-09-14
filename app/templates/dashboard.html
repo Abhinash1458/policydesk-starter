@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pill %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <div>
+      <span class="eyebrow">Overview</span>
+      <h1>Your book of business, <span class="hl">at a glance</span></h1>
+      <p>Quote → Policy → Claim. Everything below is live from the database.</p>
+    </div>
+    <div class="steps">
+      <span class="step on">1 · Quote</span><span class="arrow">→</span>
+      <span class="step on">2 · Policy</span><span class="arrow">→</span>
+      <span class="step on">3 · Claim</span>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="band" style="margin-bottom:24px">
+      <div><div class="band__value">{{ counts.policies }}</div><div class="band__label">Policies issued</div></div>
+      <div><div class="band__value">{{ counts.active }}</div><div class="band__label">Active policies</div></div>
+      <div><div class="band__value">{{ premium_collected | money }}</div><div class="band__label">Premium collected</div></div>
+      <div><div class="band__value">{{ counts.open_claims }}</div><div class="band__label">Open claims</div></div>
+    </div>
+
+    <div class="grid grid--4" style="margin-bottom:24px">
+      <div class="card stat"><span class="icon-badge">👤</span><div><div class="stat__label">Customers</div><div class="stat__value">{{ counts.customers }}</div><div class="stat__hint"><a href="/customers">Manage →</a></div></div></div>
+      <div class="card stat"><span class="icon-badge">🧮</span><div><div class="stat__label">Quotes</div><div class="stat__value">{{ counts.quotes }}</div><div class="stat__hint"><a href="/quotes/new">New quote →</a></div></div></div>
+      <div class="card stat"><span class="icon-badge">🛡️</span><div><div class="stat__label">Claims filed</div><div class="stat__value">{{ counts.claims }}</div><div class="stat__hint"><a href="/claims">Review →</a></div></div></div>
+      <div class="card stat"><span class="icon-badge">💸</span><div><div class="stat__label">Claims paid</div><div class="stat__value">{{ claims_approved | money }}</div><div class="stat__hint">approved total</div></div></div>
+    </div>
+
+    <div class="grid grid--side">
+      <div class="card">
+        <div class="card__title"><span class="icon-badge icon-badge--grad">📄</span> Recent policies</div>
+        {% if recent_policies %}
+        <div class="table-wrap"><table>
+          <thead><tr><th>Policy</th><th>Customer</th><th>Product</th><th class="num">Premium</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for p in recent_policies %}
+            <tr>
+              <td><a class="mono" href="/policies/{{ p.id }}">{{ p.policy_number }}</a></td>
+              <td>{{ p.customer.name }}</td>
+              <td>{{ p.product.name }}</td>
+              <td class="num">{{ p.premium | money }}</td>
+              <td>{{ pill(p.status) }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table></div>
+        {% else %}
+        <div class="empty">No policies yet. <a href="/quotes/new">Get a quote</a> to issue the first one.</div>
+        {% endif %}
+      </div>
+
+      <div style="display:grid;gap:20px">
+        <div class="card">
+          <div class="card__title"><span class="icon-badge">📊</span> Policies by product</div>
+          {% set max_count = (by_product | map(attribute=1) | max) or 1 %}
+          {% for name, n in by_product %}
+          <div class="bar">
+            <span>{{ name }}</span>
+            <div class="bar__track"><div class="bar__fill" style="width: {{ (n / max_count * 100) | round }}%"></div></div>
+            <b>{{ n }}</b>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="card">
+          <div class="card__title"><span class="icon-badge">🛡️</span> Recent claims</div>
+          {% if recent_claims %}
+          <ul style="display:grid;gap:10px">
+            {% for c in recent_claims %}
+            <li style="display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:.9rem">
+              <span><a class="mono" href="/policies/{{ c.policy_id }}">{{ c.policy.policy_number }}</a><br><span class="muted small">{{ c.description[:40] }}</span></span>
+              <span style="text-align:right"><b>{{ c.amount | money }}</b><br>{{ pill(c.status) }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <div class="empty small">No claims filed yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% macro pill(status) -%}
+<span class="pill pill--{{ status.value if status.value is defined else status }}">{{ status.value if status.value is defined else status }}</span>
+{%- endmacro %}
+
+{% macro alerts(flash=None, error=None) -%}
+{% if flash %}<div class="alert alert--ok">✅ <span>{{ flash }}</span></div>{% endif %}
+{% if error %}<div class="alert alert--bad">⚠️ <span>{{ error }}</span></div>{% endif %}
+{%- endmacro %}

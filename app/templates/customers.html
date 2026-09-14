@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_macros.html" import alerts %}
+{% block title %}Customers{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <div>
+      <span class="eyebrow">Customers</span>
+      <h1>Customer <span class="hl">directory</span></h1>
+      <p>{{ customers | length }} customers. Age drives the premium's age factor.</p>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    {{ alerts(error=error) }}
+    <div class="grid grid--side">
+      <div class="card" style="padding:0">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>DOB</th><th class="num">Age</th><th></th></tr></thead>
+          <tbody>
+          {% for c in customers %}
+            <tr>
+              <td><b>{{ c.name }}</b></td>
+              <td class="small">{{ c.email }}</td>
+              <td class="small mono">{{ c.phone }}</td>
+              <td class="small">{{ c.date_of_birth.strftime('%d %b %Y') }}</td>
+              <td class="num">{{ age_on(c.date_of_birth) }}</td>
+              <td><a class="btn btn--ghost btn--sm" href="/quotes/new">Quote</a></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="card__title"><span class="icon-badge icon-badge--grad">➕</span> Add a customer</div>
+        <form class="form" method="post" action="/customers">
+          <div class="field"><label for="name">Full name</label><input type="text" name="name" id="name" minlength="2" maxlength="80" required></div>
+          <div class="field"><label for="email">Email</label><input type="email" name="email" id="email" required></div>
+          <div class="field"><label for="phone">Phone</label><input type="tel" name="phone" id="phone" minlength="10" maxlength="15" pattern="[0-9+ ]{10,15}" required></div>
+          <div class="field"><label for="date_of_birth">Date of birth</label><input type="date" name="date_of_birth" id="date_of_birth" max="{{ today().isoformat() }}" required></div>
+          <div class="form__actions"><button class="btn btn--primary" type="submit">Save customer</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
