@@ -135,7 +135,7 @@ app/
   static/              theme.css · app.js · favicon.svg
 tests/                 pytest suite (you add test_pricing.py, test_claims.py, ...)
 data/                  seed CSVs
-docs/                  prompt-guide (lab-by-lab prompts), prompts (cheat-sheet), scenarios, final-project brief, rubric, ai-log
+docs/                  labs (what you do in each lab), prompt-guide, prompts (cheat-sheet), scenarios, final-project brief, rubric, ai-log
 ```
 
 ## Deploy to Render
