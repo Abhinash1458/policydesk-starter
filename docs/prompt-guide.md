@@ -2,7 +2,7 @@
 
 *TalentPath Academy · AI-Powered SDLC Workshop*
 
-This guide gives you a prompt for **every coding task** in the workshop, in the order you do them.
+This guide gives you a prompt for **every coding task** in the three labs — Lab 1 Quote, Lab 2 Policy, Lab 3 Claim — in the order you do them.
 Copy the prompt, fill in the `<…>` parts, paste the files it asks for, run the result, and **validate** it.
 
 > **The one rule:** AI writes the first draft. You own the code. If you can't explain a line, you're not done.
@@ -36,7 +36,7 @@ The more precise the CONSTRAINTS, the less the AI invents. Vague prompt → inve
 
 ### Golden rules
 
-1. **One function at a time.** Never "implement Lab 4". Ask for `age_factor`, run the tests, then `tenure_factor`.
+1. **One function at a time.** Never "implement Lab 1". Ask for `age_factor`, run the tests, then `tenure_factor`.
 2. **Paste real code.** The AI cannot see your repo unless you attach it. Wrong context → wrong answer.
 3. **Run it immediately.** `pytest -q` after every accepted answer. Green or red — you know where you stand.
 4. **Read every line.** If a line surprises you, ask `/explain` on it before you keep it.
@@ -44,7 +44,7 @@ The more precise the CONSTRAINTS, the less the AI invents. Vague prompt → inve
 
 ---
 
-## 1. Understand the codebase (first 10 minutes of Lab 4)
+## 1. Understand the codebase (first 10 minutes of Lab 1)
 
 **1.1 — Map of the repo** *(Copilot Chat)*
 ```
@@ -76,7 +76,7 @@ Start from main.py and end at the SQLite write. Mention where validation happens
 
 ---
 
-## 2. Lab 4A — Premium calculator (`app/services/pricing.py`)
+## 2. Lab 1A — Premium calculator (`app/services/pricing.py`)
 
 The rules are in the module docstring at the top of the file. Attach that file every time.
 
@@ -126,7 +126,7 @@ Put the cursor on the line after the docstring of `age_factor`, delete the `rais
 
 ---
 
-## 3. Lab 4B — Quotes API (`app/routers/quotes.py`)
+## 3. Lab 1B — Quotes API (`app/routers/quotes.py`)
 
 **3.1 — `price_quote`**
 ```
@@ -150,7 +150,7 @@ session.add / commit / refresh, return the quote. Keep status_code=201 on the de
 
 ---
 
-## 4. Lab 4C — Policies API (`app/routers/policies.py`)
+## 4. Lab 2A — Policies API (`app/routers/policies.py`)
 
 **4.1 — `issue_policy`**
 ```
@@ -170,11 +170,11 @@ quote. Store the registration stripped and upper-cased, or None. add / commit / 
 Implement update_policy_status: 404 if missing; 409 if policy.status is already PolicyStatus.CANCELLED;
 otherwise set policy.status = payload.status, add / commit / refresh, return.
 ```
-✅ Validate: `pytest` → `test_quotes_policies.py` all green (if you have it — it arrives with Lab 5; otherwise test in Swagger: cancel a policy, then try to set it Active → 409).
+✅ Validate in Swagger: cancel a policy, then try to set it Active → 409. Then write `tests/test_policies.py` (§7.1 pattern; cases in the handbook Lab 2) — the 2-year end-date case catches the −1 day.
 
 ---
 
-## 5. Scenario 1 — Quotes list page (`/quotes`)
+## 5. Lab 1C — Scenario 1, Quotes list page (`/quotes`)
 
 Read the brief first: `docs/scenarios.md` → Scenario 1.
 
@@ -212,7 +212,7 @@ Then delete the `/quotes` line from `test_student_pages_are_placeholders_until_b
 
 ---
 
-## 6. Scenario 2 — Customer 360 (`/customers/{id}`)
+## 6. Lab 2B — Scenario 2, Customer 360 (`/customers/{id}`)
 
 **6.1 — Route**
 ```
@@ -238,7 +238,7 @@ a tinted profile card + compact quotes list on the right. Policy numbers link to
 
 ---
 
-## 7. Lab 5 — Tests for the premium rules
+## 7. Tests — used in every lab (Lab 1D shown; same pattern for Lab 2 and Lab 3)
 
 **7.1 — Generate the suite** *(browser AI or Copilot `/tests`)*
 ```
@@ -266,7 +266,7 @@ then: `Here is the coverage report: <paste>. Which uncovered lines matter most a
 
 ---
 
-## 8. Lab 6 — Debug, review, refactor (`git checkout bugs`)
+## 8. Stretch — Debug, review, refactor (`git checkout bugs`, if you finish early)
 
 **8.1 — From a failing test**
 ```
@@ -303,7 +303,7 @@ counts dict. Keep the route's signature and the template context identical. Expl
 
 ---
 
-## 9. Final project — Claims module + Scenario 3
+## 9. Lab 3 — Claim feature: rules, endpoints, Scenario 3 review page
 
 **9.1 — `validate_claim`** (`app/services/claims.py`)
 ```
@@ -368,7 +368,7 @@ claim is in a final state. Use alerts(flash, error) and pill from _macros.html. 
 | Symptom | Prompt |
 |---|---|
 | A traceback in the terminal | `Here is the full traceback: <paste>. And the function at the bottom of it: <paste>. Root cause in 2 sentences, then the minimal fix.` |
-| `501 TODO Lab 4…` in the browser | That's the placeholder — you haven't replaced that function yet. Search the file for `TODO`. |
+| `501 TODO Lab 1…` (or Lab 2 / Lab 3) in the browser | That's the placeholder — you haven't replaced that function yet. Search the file for `TODO`. |
 | `jinja2.exceptions.TemplateNotFound` | The file name in `render(...)` doesn't match a file in `app/templates/`. Check spelling. |
 | `UndefinedError: 'x' is undefined` in a template | The route didn't pass `x` in the context. `Compare the variables used in <template> with the keys passed by <route function>; list what is missing.` |
 | Test passes but the page looks wrong | `#file:<template> This renders but <describe>. What in the template causes it? Fix only that.` |
@@ -385,7 +385,7 @@ Create this file in your repo on Day 1 and add to it every time the AI is wrong.
 ```
 | # | Lab | What I asked | What the AI got wrong | How I caught it | Fix |
 |---|-----|--------------|-----------------------|-----------------|-----|
-| 1 | 4A  | age_factor   | used <= 25 instead of < 25 | boundary test (25, MOTOR) → 1.2 not 1.0 | changed to < |
+| 1 | 1A  | age_factor   | used <= 25 instead of < 25 | boundary test (25, MOTOR) → 1.2 not 1.0 | changed to < |
 ```
 
 Three good entries is the target. This log is what you show in the demo.

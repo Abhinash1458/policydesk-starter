@@ -8,9 +8,9 @@ Copy the structure of a given page (`policies.html` for lists, `policy_detail.ht
 
 | # | Page | Route | Template | When |
 |---|---|---|---|---|
-| 1 | Quotes list | `GET /quotes` | `quotes.html` | Day 1 · Lab 4 (after the quotes API works) |
-| 2 | Customer 360 | `GET /customers/{id}` | `customer_detail.html` | Day 1 homework / Day 2 warm-up |
-| 3 | Claim review | `GET /claims/{id}` | `claim_detail.html` | Day 2 · Final project (with the claims module) |
+| 1 | Quotes list | `GET /quotes` | `quotes.html` | Lab 1 · Quote feature (after the quotes API works) |
+| 2 | Customer 360 | `GET /customers/{id}` | `customer_detail.html` | Lab 2 · Policy feature (optional Day 1 homework) |
+| 3 | Claim review | `GET /claims/{id}` | `claim_detail.html` | Lab 3 · Claim feature (after the claims API works) |
 
 ---
 
@@ -74,5 +74,5 @@ Copy the structure of a given page (`policies.html` for lists, `policy_detail.ht
 
 ---
 
-### Scoring (part of the final rubric)
+### Scoring (part of the rubric)
 Each scenario: works end-to-end 5 · matches the given pages' look 2 · test passes 2 · one AI mistake caught and noted in `docs/ai-log.md` 1 = **10 points each**.

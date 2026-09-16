@@ -1,4 +1,4 @@
-# Final project rubric — PolicyDesk (100 points)
+# Rubric — PolicyDesk (100 points)
 
 | Area | Points | What we look for |
 |---|---|---|

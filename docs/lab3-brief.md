@@ -1,6 +1,6 @@
-# Final project brief — the Claims module
+# Lab 3 brief — the Claim feature
 
-**Time:** 40 minutes (Day 2, 11:10–11:50) · **Team:** 3–4 · **Deliverable:** deployed URL + demo
+**Time:** 60 minutes (Day 2) · **Team:** 3–4 · **Deliverable:** claims API + Claim review page, tested, pushed (deployed in the next session)
 
 ## The ask
 
@@ -25,12 +25,11 @@ operator must be able to move the claim through **Filed → Under Review → App
 
 ### Suggested order
 
-1. **Read** — `Claim` in `app/models.py` and the claim form in `policy_detail.html` are given; read them with Copilot "explain" (3 min)
-2. **Rules** — write `validate_claim()` in `app/services/claims.py` *first*, tests alongside in `tests/test_claims.py` (17 min)
-3. **Endpoints** — `file_claim` and `update_claim_status` in `app/routers/claims.py`, thin: look up policy → call the service → save (8 min)
-4. **Scenario 3 — Claim review page** `/claims/{id}` per `docs/scenarios.md` (9 min)
-5. **Run it** — file a claim from the policy screen; open it; Review → Approve; check remaining cover drops (2 min)
-6. **Deploy + demo prep** (1 min — you deployed in Lab 7, just push)
+1. **Model** — add `Claim` to `app/models.py` (5 min)
+2. **Rules** — write `validate_claim()` in `app/services/claims.py` as a pure function *first*, tests alongside (15 min)
+3. **Endpoints** — `app/routers/claims.py`, thin: look up policy → call the service → save (10 min)
+4. **Screen** — form + table in `policy_detail.html` (7 min)
+5. **Deploy + demo prep** (3 min)
 
 ### Prompts that work
 

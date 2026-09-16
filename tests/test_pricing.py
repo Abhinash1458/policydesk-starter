@@ -1,4 +1,4 @@
-"""Lab 5 — tests for the premium calculator.
+"""Lab 1, Part D — tests for the premium calculator.
 
 One example is given. Generate the rest with AI, then *validate*: run them, read them, find the one it got wrong.
 Cover every age band and its boundaries (24/25, 45/46, 60/61), each tenure, add-ons, the minimum premium,
@@ -15,4 +15,4 @@ def test_premium_worked_example():
     ) == 15000.0
 
 
-# TODO (Lab 5): add your tests below.
+# TODO (Lab 1): add your tests below.

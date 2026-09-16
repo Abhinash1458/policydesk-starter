@@ -8,21 +8,24 @@ write tests, find bugs and deploy.
 and [docs/scenarios.md](docs/scenarios.md)). The database, models, theme and the given screens are done.
 You build the rest, lab by lab — every TODO is marked in the code:
 
-| Lab | Where | What you build |
-|---|---|---|
-| Lab 4 | `app/services/pricing.py` | the premium calculator (4 small functions) |
-| Lab 4 | `app/routers/quotes.py` | `price_quote` + `POST /api/quotes` |
-| Lab 4 | `app/routers/policies.py` | `issue_policy` + `PATCH /api/policies/{id}/status` |
-| Lab 4 | `app/routers/pages.py` + `app/templates/quotes.html` | **Scenario 1 — Quotes list page** |
-| Homework | `app/routers/pages.py` + `app/templates/customer_detail.html` | **Scenario 2 — Customer 360 page** |
-| Lab 5 | `tests/test_pricing.py` | pytest for the premium rules and edge cases |
-| Lab 6 | `git checkout bugs` | find and fix 5 seeded bugs, refactor, AI code review |
-| Lab 7 | `README.md`, Render | docs + deploy + read the logs |
-| Final | `app/services/claims.py`, `app/routers/claims.py`, `tests/test_claims.py` | the Claims module |
-| Final | `app/routers/pages.py` + `app/templates/claim_detail.html` | **Scenario 3 — Claim review page** |
+Three labs, **one feature each** — rules → API → page → tests:
 
-Search the code for `TODO` to find every spot. In the app, the three student pages show a placeholder with
-the brief until you replace them. Behind? `git checkout day1-complete` has Lab 4 + Scenario 1 finished.
+| Lab | Feature | Where | What you build |
+|---|---|---|---|
+| **Lab 1** | Quote | `app/services/pricing.py` | the premium calculator (4 small functions) |
+| | | `app/routers/quotes.py` | `price_quote` + `POST /api/quotes` |
+| | | `app/routers/pages.py` + `app/templates/quotes.html` | **Scenario 1 — Quotes list page** |
+| | | `tests/test_pricing.py`, `tests/test_pages.py` | pricing tests (find the one the AI got wrong), one page test |
+| **Lab 2** | Policy | `app/routers/policies.py` | `issue_policy` + `PATCH /api/policies/{id}/status` |
+| | | `app/routers/pages.py` + `app/templates/customer_detail.html` | **Scenario 2 — Customer 360 page** |
+| | | `tests/test_policies.py`, `tests/test_pages.py` | policy tests, Customer 360 tests |
+| **Lab 3** | Claim | `app/services/claims.py`, `app/routers/claims.py` | claim rules + file / review endpoints (**tests first** in `tests/test_claims.py`) |
+| | | `app/routers/pages.py` + `app/templates/claim_detail.html` | **Scenario 3 — Claim review page** |
+| Ship | — | `README.md`, Render | docs + deploy + read the logs |
+| Stretch | — | `git checkout bugs` | 5 seeded bugs, refactor, AI code review |
+
+Search the code for `TODO (Lab 1)`, `TODO (Lab 2)`, `TODO (Lab 3)` to find every spot. In the app, the three student
+pages show a placeholder with the brief until you replace them. Behind? `git checkout lab1-complete` or `lab2-complete`.
 
 **Start here:** [docs/prompt-guide.md](docs/prompt-guide.md) has a ready-to-use prompt for every task above,
 in order, with what to paste and what to check. Log what the AI gets wrong in [docs/ai-log.md](docs/ai-log.md).
@@ -112,7 +115,7 @@ premium = sum_insured x base_rate x age_factor x tenure_factor x add_on_factor  
 | 2 | Customers | `/customers` | given |
 | 3 | Customer 360 | `/customers/{id}` | **you build — Scenario 2** |
 | 4 | Products | `/products` | given |
-| 5 | Get a quote | `/quotes/new` | given (pricing = Lab 4) |
+| 5 | Get a quote | `/quotes/new` | given (pricing = Lab 1) |
 | 6 | Quote detail / issue policy | `/quotes/{id}` | given |
 | 7 | Quotes list | `/quotes` | **you build — Scenario 1** |
 | 8 | Policies | `/policies` | given |
@@ -135,7 +138,7 @@ app/
   static/              theme.css · app.js · favicon.svg
 tests/                 pytest suite (you add test_pricing.py, test_claims.py, ...)
 data/                  seed CSVs
-docs/                  labs (what you do in each lab), prompt-guide, prompts (cheat-sheet), scenarios, final-project brief, rubric, ai-log
+docs/                  labs (what you do in each session), prompt-guide, prompts (cheat-sheet), scenarios, lab3-brief, rubric, ai-log, setup-guide
 ```
 
 ## Deploy to Render

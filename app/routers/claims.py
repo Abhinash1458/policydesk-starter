@@ -1,4 +1,4 @@
-"""Claims API.   *** FINAL PROJECT: YOUR CODE HERE ***
+"""Claims API.   *** LAB 3: YOUR CODE HERE ***
 
 POST  /api/claims               -> file a claim (201). Runs services.claims.validate_claim:
                                      ClaimValidationError with auto_reject  -> save the claim as Rejected, reason = message
@@ -21,9 +21,9 @@ router = APIRouter(prefix="/api/claims", tags=["claims"])
 
 def file_claim(payload: ClaimCreate, session: Session) -> Claim:
     """Shared by the API and the HTML form."""
-    # TODO (Final project): look up the policy (404), build Claim.model_validate(payload), run
+    # TODO (Lab 3): look up the policy (404), build Claim.model_validate(payload), run
     #                       claim_rules.validate_claim(...), handle the two kinds of error, save and return.
-    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "TODO Final project: implement file_claim in app/routers/claims.py")
+    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "TODO Lab 3: implement file_claim in app/routers/claims.py")
 
 
 @router.get("", response_model=list[ClaimRead])
@@ -49,6 +49,6 @@ def get_claim(claim_id: int, session: Session = Depends(get_session)):
 
 @router.patch("/{claim_id}/status", response_model=ClaimRead)
 def update_claim_status(claim_id: int, payload: ClaimStatusUpdate, session: Session = Depends(get_session)):
-    # TODO (Final project): 404 if missing; 409 unless claim_rules.can_transition(...); when approving, 422 if
+    # TODO (Lab 3): 404 if missing; 409 unless claim_rules.can_transition(...); when approving, 422 if
     #                       claim.amount > claim_rules.remaining_cover(session, claim.policy); then save status + reason.
-    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "TODO Final project: implement update_claim_status")
+    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "TODO Lab 3: implement update_claim_status")

@@ -41,7 +41,7 @@ def ids(client):
     return {"customers": customers, "products": products}
 
 
-# The two fixtures below only work once Lab 4 (quotes + policies) is done. Use them in Lab 5 and the final project.
+# The two fixtures below need Lab 1 (quotes) AND Lab 2 (policies) done. Use them in Lab 2 and Lab 3 tests.
 @pytest.fixture
 def health_policy(client, ids):
     """An active 1-year Health policy for Priya Nair (age ~36), sum insured 5,00,000."""

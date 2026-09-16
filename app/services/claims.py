@@ -1,4 +1,4 @@
-"""Claim validation rules.   *** FINAL PROJECT: YOUR CODE HERE ***
+"""Claim validation rules.   *** LAB 3: YOUR CODE HERE ***
 
 A claim is accepted for filing only if:
     1. The policy is Active.
@@ -47,8 +47,8 @@ def validate_claim(
     vehicle_registration: str | None,
 ) -> None:
     """Raise ClaimValidationError if the claim must not be filed. Return None when it is fine."""
-    # TODO (Final project): implement rules 1-4 from the module docstring, in that order.
-    raise NotImplementedError("Final project: implement validate_claim")
+    # TODO (Lab 3): implement rules 1-4 from the module docstring, in that order.
+    raise NotImplementedError("Lab 3: implement validate_claim")
 
 
 ALLOWED_TRANSITIONS: dict[ClaimStatus, set[ClaimStatus]] = {

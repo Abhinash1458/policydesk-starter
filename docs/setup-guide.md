@@ -211,7 +211,7 @@ Render hosts the app on a public URL on Day 2. The free plan needs no card.
 
 1. Go to https://render.com and click *Get Started → Sign up with GitHub*.
 2. Authorise Render to access your GitHub account. When asked which repositories, choose **All repositories** (or you will have to come back for your team repo on Day 2).
-3. Verify your email if Render asks. You land on the Dashboard — that is enough for now; we create the web service together in Lab 7.
+3. Verify your email if Render asks. You land on the Dashboard — that is enough for now; we create the web service together in the deployment session on Day 2.
 
 **Check** — https://dashboard.render.com opens and shows your GitHub username at top-right.
 
