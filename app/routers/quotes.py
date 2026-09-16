@@ -38,7 +38,7 @@ def list_quotes(session: Session = Depends(get_session)):
     return session.exec(select(Quote).order_by(Quote.created_at.desc())).all()
 
 
-@router.post("", response_model=QuoteRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=QuoteRead)
 def create_quote(payload: QuoteCreate, session: Session = Depends(get_session)):
     premium, _, _ = price_quote(payload, session)
     quote = Quote(**payload.model_dump(), premium=premium)

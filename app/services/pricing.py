@@ -49,7 +49,7 @@ def age_on(dob: date, on: date | None = None) -> int:
 def age_factor(age: int, product: ProductCode) -> float:
     if age < 0:
         raise PricingError("Age cannot be negative")
-    if age < 25:
+    if age <= 25:
         return 1.2 if product == ProductCode.MOTOR else 0.8
     if age <= 45:
         return 1.0
@@ -109,4 +109,4 @@ def calculate_premium(
         * tenure_factor(tenure_years)
         * add_on_factor(product, add_ons or [])
     )
-    return round(max(premium, MIN_PREMIUM), 2)
+    return float(int(max(premium, MIN_PREMIUM)))

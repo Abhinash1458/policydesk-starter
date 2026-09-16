@@ -83,12 +83,10 @@ def dashboard(request: Request, session: Session = Depends(get_session)):
     claims_approved = session.exec(
         select(func.coalesce(func.sum(Claim.amount), 0)).where(Claim.status == ClaimStatus.APPROVED)
     ).one()
-    by_product = session.exec(
-        select(Product.name, func.count(Policy.id))
-        .join(Policy, Policy.product_id == Product.id, isouter=True)
-        .group_by(Product.id)
-        .order_by(Product.id)
-    ).all()
+    by_product = []
+    for product in session.exec(select(Product).order_by(Product.id)).all():
+        n = len(session.exec(select(Policy).where(Policy.product_id == product.id)).all())
+        by_product.append((product.name, n))
     recent_policies = session.exec(select(Policy).order_by(Policy.created_at.desc()).limit(5)).all()
     recent_claims = session.exec(select(Claim).order_by(Claim.created_at.desc()).limit(5)).all()
     return render(

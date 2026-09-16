@@ -76,8 +76,6 @@ def update_policy_status(policy_id: int, payload: PolicyStatusUpdate, session: S
     policy = session.get(Policy, policy_id)
     if not policy:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Policy not found")
-    if policy.status == PolicyStatus.CANCELLED:
-        raise HTTPException(status.HTTP_409_CONFLICT, "A cancelled policy cannot be changed")
     policy.status = payload.status
     session.add(policy)
     session.commit()
