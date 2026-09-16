@@ -27,7 +27,7 @@ Three labs, **one feature each** — rules → API → page → tests:
 Search the code for `TODO (Lab 1)`, `TODO (Lab 2)`, `TODO (Lab 3)` to find every spot. In the app, the three student
 pages show a placeholder with the brief until you replace them. Behind? `git checkout lab1-complete` or `lab2-complete`.
 
-**Start here:** [docs/prompt-guide.md](docs/prompt-guide.md) has a ready-to-use prompt for every task above,
+**Start here:** [docs/lab1-prompt-guide.md](docs/lab1-prompt-guide.md), [lab2](docs/lab2-prompt-guide.md), [lab3](docs/lab3-prompt-guide.md) — one guide per lab with every prompt,
 in order, with what to paste and what to check. Log what the AI gets wrong in [docs/ai-log.md](docs/ai-log.md).
 
 | Stack | |
@@ -138,7 +138,7 @@ app/
   static/              theme.css · app.js · favicon.svg
 tests/                 pytest suite (you add test_pricing.py, test_claims.py, ...)
 data/                  seed CSVs
-docs/                  labs (what you do in each session), prompt-guide, prompts (cheat-sheet), scenarios, lab3-brief, rubric, ai-log, setup-guide
+docs/                  lab1|lab2|lab3-prompt-guide (start here), labs, scenarios, prompt-guide, prompts, rubric, ai-log, setup-guide
 ```
 
 ## Deploy to Render
