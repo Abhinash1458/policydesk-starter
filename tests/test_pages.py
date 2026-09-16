@@ -10,7 +10,6 @@ def test_given_pages_render(client):
 
 def test_student_pages_are_placeholders_until_built(client):
     # These pass until each scenario is done — then REPLACE the line with a real test.
-    assert "not built yet" in client.get("/customers/1").text     # Scenario 2 (Lab 2)
     assert "not built yet" in client.get("/claims/1").text        # Scenario 3 (Lab 3)
 
 
@@ -32,5 +31,18 @@ def test_quotes_list_open_and_product_filter(client, ids):
     assert f'href="/quotes/{health_q["id"]}"' not in motor_only
 
 
-# TODO (Lab 2, Scenario 2): test_customer_360_lists_policies_and_claims  +  unknown id -> 404
+# ---- Scenario 2: customer 360 (Lab 2) ------------------------------------------
+def test_customer_360_lists_policies(client, health_policy):
+    r = client.get(f"/customers/{health_policy['customer_id']}")
+    assert r.status_code == 200
+    assert "Priya Nair" in r.text
+    assert health_policy["policy_number"] in r.text
+    assert "₹15,000.00" in r.text  # annual premium total
+
+
+def test_customer_360_empty_customer_and_404(client, ids):
+    assert client.get(f"/customers/{ids['customers']['Rohan Das']}").status_code == 200
+    assert client.get("/customers/999").status_code == 404
+
+
 # TODO (Lab 3, Scenario 3): test_claim_review_page_and_workflow          +  unknown id -> 404

@@ -163,9 +163,23 @@ def quotes_list(
 
 @router.get("/customers/{customer_id}", response_class=HTMLResponse)
 def customer_detail(request: Request, customer_id: int, session: Session = Depends(get_session)):
-    """SCENARIO 2 — Customer 360. TODO: session.get(Customer, id) (404 if missing), collect their quotes,
-    policies and claims, render customer_detail.html."""
-    return scenario_placeholder(request, 2)
+    """SCENARIO 2 — Customer 360: profile, totals, and every quote / policy / claim for one customer."""
+    customer = session.get(Customer, customer_id)
+    if not customer:
+        raise HTTPException(404, "Customer not found")
+    policies = sorted(customer.policies, key=lambda p: p.created_at, reverse=True)
+    claims = sorted((c for p in policies for c in p.claims), key=lambda c: c.created_at, reverse=True)
+    return render(
+        request,
+        "customer_detail.html",
+        customer=customer,
+        age=pricing.age_on(customer.date_of_birth),
+        quotes=sorted(customer.quotes, key=lambda q: q.created_at, reverse=True),
+        policies=policies,
+        claims=claims,
+        premium_total=sum(p.premium for p in policies if p.status != PolicyStatus.CANCELLED),
+        active_count=sum(1 for p in policies if p.status == PolicyStatus.ACTIVE),
+    )
 
 
 @router.get("/claims/{claim_id}", response_class=HTMLResponse)

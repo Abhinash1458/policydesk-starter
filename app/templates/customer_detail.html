@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pill %}
+{% block title %}{{ customer.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <div>
+      <span class="eyebrow">Customer 360</span>
+      <h1>{{ customer.name }}</h1>
+      <p>{{ customer.email }} · {{ customer.phone }} · age {{ age }}</p>
+    </div>
+    <a class="btn btn--primary" href="/quotes/new?customer_id={{ customer.id }}">New quote for {{ customer.name.split(' ')[0] }}</a>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="grid grid--4" style="margin-bottom:20px">
+      <div class="card stat"><span class="icon-badge">🧮</span><div><div class="stat__label">Quotes</div><div class="stat__value">{{ quotes | length }}</div></div></div>
+      <div class="card stat"><span class="icon-badge">📄</span><div><div class="stat__label">Policies</div><div class="stat__value">{{ policies | length }}</div><div class="stat__hint">{{ active_count }} active</div></div></div>
+      <div class="card stat"><span class="icon-badge">💳</span><div><div class="stat__label">Annual premium</div><div class="stat__value">{{ premium_total | money }}</div></div></div>
+      <div class="card stat"><span class="icon-badge">🛡️</span><div><div class="stat__label">Claims</div><div class="stat__value">{{ claims | length }}</div></div></div>
+    </div>
+
+    <div class="grid grid--side">
+      <div style="display:grid;gap:20px">
+        <div class="card">
+          <div class="card__title"><span class="icon-badge">📄</span> Policies</div>
+          {% if policies %}
+          <div class="table-wrap"><table>
+            <thead><tr><th>Policy</th><th>Product</th><th class="num">Sum insured</th><th class="num">Premium</th><th>Period</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for p in policies %}
+              <tr>
+                <td><a class="mono" href="/policies/{{ p.id }}">{{ p.policy_number }}</a></td>
+                <td>{{ p.product.name }}</td>
+                <td class="num">{{ p.sum_insured | money }}</td>
+                <td class="num">{{ p.premium | money }}</td>
+                <td class="small muted">{{ p.start_date.strftime('%d %b %Y') }} → {{ p.end_date.strftime('%d %b %Y') }}</td>
+                <td>{{ pill(p.status) }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table></div>
+          {% else %}<div class="empty small">No policies yet.</div>{% endif %}
+        </div>
+
+        <div class="card">
+          <div class="card__title"><span class="icon-badge">🛡️</span> Claims</div>
+          {% if claims %}
+          <div class="table-wrap"><table>
+            <thead><tr><th>#</th><th>Policy</th><th>Incident</th><th class="num">Amount</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for c in claims %}
+              <tr>
+                <td class="mono"><a href="/claims/{{ c.id }}">{{ c.id }}</a></td>
+                <td class="mono small">{{ c.policy.policy_number }}</td>
+                <td class="small">{{ c.incident_date.strftime('%d %b %Y') }}</td>
+                <td class="num">{{ c.amount | money }}</td>
+                <td>{{ pill(c.status) }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table></div>
+          {% else %}<div class="empty small">No claims yet.</div>{% endif %}
+        </div>
+      </div>
+
+      <div style="display:grid;gap:20px;align-content:start">
+        <div class="card card--tint">
+          <div class="card__title"><span class="icon-badge icon-badge--grad">👤</span> Profile</div>
+          <dl class="kv small">
+            <dt>Name</dt><dd>{{ customer.name }}</dd>
+            <dt>Email</dt><dd>{{ customer.email }}</dd>
+            <dt>Phone</dt><dd class="mono">{{ customer.phone }}</dd>
+            <dt>Date of birth</dt><dd>{{ customer.date_of_birth.strftime('%d %b %Y') }} <span class="muted">(age {{ age }})</span></dd>
+            <dt>Customer since</dt><dd>{{ customer.created_at.strftime('%d %b %Y') }}</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <div class="card__title"><span class="icon-badge">🧮</span> Quotes</div>
+          {% if quotes %}
+          <ul style="display:grid;gap:10px">
+            {% for q in quotes %}
+            <li style="display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:.9rem">
+              <span><a href="/quotes/{{ q.id }}"><b>#{{ q.id }}</b></a> · {{ q.product.name }}<br><span class="muted small">{{ q.sum_insured | money }} · {{ q.tenure_years }} yr</span></span>
+              <span style="text-align:right"><b>{{ q.premium | money }}</b><br>{% if q.policy %}<span class="pill pill--ok">Converted</span>{% else %}<a class="pill pill--info" href="/quotes/{{ q.id }}">Open</a>{% endif %}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}<div class="empty small">No quotes yet.</div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
