@@ -47,8 +47,26 @@ def validate_claim(
     vehicle_registration: str | None,
 ) -> None:
     """Raise ClaimValidationError if the claim must not be filed. Return None when it is fine."""
-    # TODO (Lab 3): implement rules 1-4 from the module docstring, in that order.
-    raise NotImplementedError("Lab 3: implement validate_claim")
+    # 1. policy status
+    if policy.status == PolicyStatus.CANCELLED:
+        raise ClaimValidationError("Policy is cancelled", auto_reject=True)
+    if policy.status != PolicyStatus.ACTIVE:
+        raise ClaimValidationError(f"Policy is {policy.status.value.lower()}; only Active policies accept claims")
+
+    # 2. incident inside the policy period
+    if not (policy.start_date <= incident_date <= policy.end_date):
+        raise ClaimValidationError(
+            f"Incident date must fall within the policy period {policy.start_date} to {policy.end_date}"
+        )
+
+    # 3. amount within remaining cover
+    remaining = remaining_cover(session, policy)
+    if amount > remaining:
+        raise ClaimValidationError(f"Claim amount exceeds remaining cover of {remaining:,.2f}")
+
+    # 4. Motor claims need a vehicle registration
+    if policy.product.code == ProductCode.MOTOR and not (vehicle_registration or "").strip():
+        raise ClaimValidationError("Motor claims need a vehicle registration number")
 
 
 ALLOWED_TRANSITIONS: dict[ClaimStatus, set[ClaimStatus]] = {

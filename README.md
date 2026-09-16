@@ -1,5 +1,9 @@
 # PolicyDesk — starter
 
+> **You are on the `solution` branch.** Every Lab 1/2/3 TODO and all three scenario pages are implemented and
+> covered by 80 tests (`pytest`). Students clone `main`; trainers use this branch for live demos and as the
+> answer key. Do not share it before Day 2.
+
 A simplified insurance **quote → policy → claim** application, built for the
 TalentPath Academy **AI-Powered SDLC Workshop** — small enough to read in an hour, real enough to
 write tests, find bugs and deploy.

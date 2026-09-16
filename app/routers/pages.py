@@ -29,7 +29,7 @@ from app.routers.claims import file_claim, update_claim_status
 from app.routers.policies import issue_policy
 from app.routers.quotes import price_quote
 from app.services import pricing
-from app.services.claims import ALLOWED_TRANSITIONS, remaining_cover  # noqa: F401  (ALLOWED_TRANSITIONS: Scenario 3)
+from app.services.claims import ALLOWED_TRANSITIONS, remaining_cover
 
 router = APIRouter(include_in_schema=False)
 templates = Jinja2Templates(directory=Path(__file__).resolve().parent.parent / "templates")
@@ -135,24 +135,74 @@ def scenario_placeholder(request: Request, number: int):
 
 
 @router.get("/quotes", response_class=HTMLResponse)
-def quotes_list(request: Request, session: Session = Depends(get_session)):
-    """SCENARIO 1 — Quotes list. TODO: query quotes (filter ?status=open|converted, ?product=CODE),
-    render quotes.html. Delete the placeholder line when done."""
-    return scenario_placeholder(request, 1)
+def quotes_list(
+    request: Request,
+    status: str | None = None,
+    product: str | None = None,
+    session: Session = Depends(get_session),
+):
+    """SCENARIO 1 — Quotes list. Product is filtered in SQL; open/converted in Python (there is no Quote.status)."""
+    stmt = select(Quote).order_by(Quote.created_at.desc())
+    if product:
+        stmt = stmt.join(Product, Product.id == Quote.product_id).where(Product.code == product.upper())
+    quotes = session.exec(stmt).all()
+    open_count = sum(1 for q in quotes if q.policy is None)
+    if status == "open":
+        quotes = [q for q in quotes if q.policy is None]
+    elif status == "converted":
+        quotes = [q for q in quotes if q.policy is not None]
+    return render(
+        request,
+        "quotes.html",
+        quotes=quotes,
+        open_count=open_count,
+        status=status,
+        product=product.upper() if product else None,
+        products=session.exec(select(Product).order_by(Product.id)).all(),
+    )
 
 
 @router.get("/customers/{customer_id}", response_class=HTMLResponse)
 def customer_detail(request: Request, customer_id: int, session: Session = Depends(get_session)):
-    """SCENARIO 2 — Customer 360. TODO: session.get(Customer, id) (404 if missing), collect their quotes,
-    policies and claims, render customer_detail.html."""
-    return scenario_placeholder(request, 2)
+    """SCENARIO 2 — Customer 360."""
+    customer = session.get(Customer, customer_id)
+    if not customer:
+        raise HTTPException(404, "Customer not found")
+    policies = sorted(customer.policies, key=lambda p: p.created_at, reverse=True)
+    quotes = sorted(customer.quotes, key=lambda q: q.created_at, reverse=True)
+    claims = sorted((c for p in policies for c in p.claims), key=lambda c: c.created_at, reverse=True)
+    return render(
+        request,
+        "customer_detail.html",
+        customer=customer,
+        age=pricing.age_on(customer.date_of_birth),
+        policies=policies,
+        quotes=quotes,
+        claims=claims,
+        active_count=sum(1 for p in policies if p.status == PolicyStatus.ACTIVE),
+        premium_total=sum(p.premium for p in policies if p.status != PolicyStatus.CANCELLED),
+    )
 
 
 @router.get("/claims/{claim_id}", response_class=HTMLResponse)
 def claim_detail(request: Request, claim_id: int, session: Session = Depends(get_session)):
-    """SCENARIO 3 — Claim review. TODO: session.get(Claim, id) (404 if missing), remaining cover, allowed next
-    states from ALLOWED_TRANSITIONS, render claim_detail.html."""
-    return scenario_placeholder(request, 3)
+    """SCENARIO 3 — Claim review. Allowed actions come from the service, not the template."""
+    claim = session.get(Claim, claim_id)
+    if not claim:
+        raise HTTPException(404, "Claim not found")
+    remaining = remaining_cover(session, claim.policy)
+    return render(
+        request,
+        "claim_detail.html",
+        claim=claim,
+        policy=claim.policy,
+        remaining=remaining,
+        within_cover=claim.amount <= remaining,
+        next_states=sorted(ALLOWED_TRANSITIONS[claim.status], key=lambda s: s.value),
+        other_claims=[c for c in claim.policy.claims if c.id != claim.id],
+        flash=request.query_params.get("flash"),
+        error=request.query_params.get("error"),
+    )
 
 
 # --------------------------------------------------------------------------- #

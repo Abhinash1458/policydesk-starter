@@ -9,7 +9,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: [main, solution]
   pull_request:
     branches: [main]
   workflow_dispatch:        # "Run workflow" button — useful during the trainer's deployment demo
