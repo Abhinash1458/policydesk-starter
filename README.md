@@ -56,7 +56,32 @@ Delete the file to reset.
 ```bash
 pytest            # run the test suite
 pytest -v         # verbose
+pytest -m smoke        # the 2 smoke tests CI runs first
+pytest -m regression   # the 10 regression tests CI runs next
+pytest -m "not lab"    # everything except student targets that are still TODO
 ```
+
+## CI/CD — GitHub Actions
+
+Every push and pull request to `main` runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml) on GitHub's free
+`ubuntu-latest` runner:
+
+```
+smoke (2 tests)  ──►  regression (10 tests)  ──►  deploy to Render (main only)
+```
+
+| Stage | What runs | If it fails |
+|---|---|---|
+| **Smoke** | `tests/test_smoke.py` — `/health` answers, home page serves HTML | pipeline stops here |
+| **Regression** | `tests/test_regression.py` — seed data, customers API (201/409/422/404), given pages render; then `pytest -m "not lab"` | no deploy |
+| **Deploy** | `POST` to the Render deploy hook in the `RENDER_DEPLOY_HOOK` secret | — (skipped with a notice if the secret is not set) |
+
+Tests marked `@pytest.mark.lab` (e.g. `tests/test_pricing.py`) fail on the starter on purpose — they are your lab
+targets. CI ignores them until you delete the marker, which you should do the moment your implementation passes.
+Watch the **Actions** tab after you push: green means your feature did not break anything that was already working.
+
+To enable deploys: Render → your service → Settings → **Deploy Hook** → copy the URL → GitHub repo → Settings →
+Secrets and variables → Actions → **New repository secret** `RENDER_DEPLOY_HOOK`.
 
 ## The domain
 

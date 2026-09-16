@@ -4,8 +4,14 @@ One example is given. Generate the rest with AI, then *validate*: run them, read
 Cover every age band and its boundaries (24/25, 45/46, 60/61), each tenure, add-ons, the minimum premium,
 invalid input (age -1, sum insured 0 or negative, tenure 4) and a worked example you calculated by hand.
 """
+import pytest
+
 from app.models import ProductCode
 from app.services.pricing import calculate_premium
+
+# Fails on the starter by design (calculate_premium is your Lab 1 TODO). CI skips `lab` tests until you
+# remove this marker — do that as soon as your implementation makes it pass.
+pytestmark = pytest.mark.lab
 
 
 def test_premium_worked_example():
