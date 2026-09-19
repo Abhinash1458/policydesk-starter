@@ -8,7 +8,9 @@ from collections.abc import Generator
 
 from sqlmodel import Session, SQLModel, create_engine
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./policydesk.db")
+# On Vercel the project directory is read-only; /tmp is the only writable path (and is wiped on cold start).
+_default_url = "sqlite:////tmp/policydesk.db" if os.getenv("VERCEL") else "sqlite:///./policydesk.db"
+DATABASE_URL = os.getenv("DATABASE_URL", _default_url)
 
 # check_same_thread=False lets FastAPI use the connection across threads.
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
