@@ -1,6 +1,6 @@
 # PolicyDesk CI/CD — runs on GitHub's free hosted runner (ubuntu-latest).
 #
-#   smoke (2 tests)  ──►  regression (10 tests)  ──►  deploy (main only, Render deploy hook)
+#   smoke (2 tests)  ──►  regression (all)  ──►  deploy (main only, Render deploy hook)
 #
 # Fails fast: if smoke fails, regression never runs; if regression fails, nothing deploys.
 # Lab tests (marker `lab`) are excluded until students remove the marker — see tests/test_pricing.py.
@@ -40,7 +40,7 @@ jobs:
           path: reports/smoke.xml
 
   regression:
-    name: Regression tests (10)
+    name: Regression tests
     needs: smoke
     runs-on: ubuntu-latest
     steps:

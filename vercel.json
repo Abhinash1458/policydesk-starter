@@ -1,6 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
+  "services": {
+    "policydesk": {
+      "root": ".",
+      "entrypoint": "api/index.py",
+      "buildCommand": "pip install -r requirements.txt"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": { "type": "service", "service": "policydesk" }
+    }
+  ],
   "env": { "APP_ENV": "vercel" }
 }

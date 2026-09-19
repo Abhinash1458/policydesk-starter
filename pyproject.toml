@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]   # so bare `pytest` (as CI runs it) can import `app`
 addopts = "-q"
 filterwarnings = ["ignore::DeprecationWarning"]
 markers = [
