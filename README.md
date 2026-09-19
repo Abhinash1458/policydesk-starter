@@ -87,6 +87,24 @@ Watch the **Actions** tab after you push: green means your feature did not break
 To enable deploys: Render → your service → Settings → **Deploy Hook** → copy the URL → GitHub repo → Settings →
 Secrets and variables → Actions → **New repository secret** `RENDER_DEPLOY_HOOK`.
 
+### Vercel (second target, also gated by the tests)
+
+The `deploy-vercel` job runs after regression on pushes to `main` and `solution`. It uses the Vercel CLI on the
+runner (`vercel pull` → `vercel build` → `vercel deploy --prebuilt --prod`) and then curls `/health` on the live URL.
+Vercel's own push-to-deploy is disabled in `vercel.json` (`git.deploymentEnabled: false`) so **only green pipelines
+ship**. Live: https://policydesk-jet.vercel.app
+
+Three repository secrets are needed (the job skips with a notice until they exist):
+
+| Secret | Where to get it |
+|---|---|
+| `VERCEL_TOKEN` | vercel.com → Account → Settings → **Tokens** → Create (scope: the team, expiry: your choice) |
+| `VERCEL_ORG_ID` | `.vercel/project.json` → `orgId` after one `vercel link` / `vercel deploy` |
+| `VERCEL_PROJECT_ID` | `.vercel/project.json` → `projectId` |
+
+The app is unchanged for Vercel; [`api/index.py`](api/index.py) is the entry point and SQLite lives in `/tmp` (reset on
+every cold start — demo only).
+
 ## The domain
 
 ```

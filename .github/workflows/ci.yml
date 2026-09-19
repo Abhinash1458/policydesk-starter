@@ -1,8 +1,10 @@
 # PolicyDesk CI/CD — runs on GitHub's free hosted runner (ubuntu-latest).
 #
-#   smoke (2 tests)  ──►  regression (all)  ──►  deploy (main only, Render deploy hook)
+#   smoke (2 tests)  ──►  regression (all)  ──►  deploy-render (main)
+#                                          └──►  deploy-vercel (main + solution, Vercel CLI)
 #
 # Fails fast: if smoke fails, regression never runs; if regression fails, nothing deploys.
+# Vercel's own git auto-deploy is turned off in vercel.json so this workflow is the only way to ship.
 # Lab tests (marker `lab`) are excluded until students remove the marker — see tests/test_pricing.py.
 
 name: CI/CD
@@ -60,7 +62,7 @@ jobs:
           name: regression-report
           path: reports/regression.xml
 
-  deploy:
+  deploy-render:
     name: Deploy to Render
     needs: regression
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -76,3 +78,57 @@ jobs:
             exit 0
           fi
           curl -fsS -X POST "$HOOK" && echo "Deploy triggered on Render."
+
+  deploy-vercel:
+    name: Deploy to Vercel
+    needs: regression
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/solution')
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: Check secrets
+        id: gate
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "::notice::VERCEL_TOKEN / VERCEL_ORG_ID / VERCEL_PROJECT_ID not set — tests passed, Vercel deploy skipped."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.ready == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.ready == 'true'
+        with:
+          node-version: 20
+      - uses: astral-sh/setup-uv@v5          # `vercel build` needs uv for Python projects
+        if: steps.gate.outputs.ready == 'true'
+      - name: Install Vercel CLI
+        if: steps.gate.outputs.ready == 'true'
+        run: npm install -g vercel
+      - name: Pull project settings
+        if: steps.gate.outputs.ready == 'true'
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+      - name: Build
+        if: steps.gate.outputs.ready == 'true'
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+      - name: Deploy prebuilt output
+        # The build must happen on Linux (this runner) — a `vercel build` from a Windows laptop uploads
+        # Windows-compiled wheels and the function dies with "No module named pydantic_core._pydantic_core".
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          URL=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          echo "Deployed: $URL"
+          echo "::notice::Vercel production deploy: $URL"
+      - name: Smoke-check the live URL
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if curl -fsS https://policydesk-jet.vercel.app/health; then echo; echo "Live."; exit 0; fi
+            sleep 10
+          done
+          echo "::error::/health did not answer after deploy"; exit 1

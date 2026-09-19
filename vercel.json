@@ -13,5 +13,6 @@
       "destination": { "type": "service", "service": "policydesk" }
     }
   ],
-  "env": { "APP_ENV": "vercel" }
+  "env": { "APP_ENV": "vercel" },
+  "git": { "deploymentEnabled": false }
 }
