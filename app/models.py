@@ -1,6 +1,6 @@
 """SQLModel tables and API schemas for PolicyDesk.
 
-Five tables: Customer, Product, Quote, Policy, Claim.
+Four tables so far: Customer, Product, Quote, Policy.  (You add Claim in Phase 2.)
 Flow: Customer + Product -> Quote -> Policy -> Claim
 """
 from datetime import date, datetime
@@ -24,13 +24,6 @@ class PolicyStatus(str, Enum):
     ACTIVE = "Active"
     LAPSED = "Lapsed"
     CANCELLED = "Cancelled"
-
-
-class ClaimStatus(str, Enum):
-    FILED = "Filed"
-    UNDER_REVIEW = "Under Review"
-    APPROVED = "Approved"
-    REJECTED = "Rejected"
 
 
 # --------------------------------------------------------------------------- #
@@ -134,7 +127,6 @@ class Policy(PolicyBase, table=True):
     quote: Quote = Relationship(back_populates="policy")
     customer: Customer = Relationship(back_populates="policies")
     product: Product = Relationship()
-    claims: list["Claim"] = Relationship(back_populates="policy")
 
 
 class PolicyCreate(PolicyBase):
@@ -158,39 +150,3 @@ class PolicyRead(SQLModel):
 
 class PolicyStatusUpdate(SQLModel):
     status: PolicyStatus
-
-
-# --------------------------------------------------------------------------- #
-# Claim
-# --------------------------------------------------------------------------- #
-class ClaimBase(SQLModel):
-    policy_id: int = Field(foreign_key="policy.id")
-    amount: float = Field(gt=0)
-    description: str = Field(min_length=5, max_length=500)
-    incident_date: date
-    vehicle_registration: str | None = Field(default=None, description="Required for Motor claims")
-
-
-class Claim(ClaimBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    status: ClaimStatus = Field(default=ClaimStatus.FILED)
-    reason: str | None = Field(default=None, description="Why a claim was rejected")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-    policy: Policy = Relationship(back_populates="claims")
-
-
-class ClaimCreate(ClaimBase):
-    pass
-
-
-class ClaimRead(ClaimBase):
-    id: int
-    status: ClaimStatus
-    reason: str | None
-    created_at: datetime
-
-
-class ClaimStatusUpdate(SQLModel):
-    status: ClaimStatus
-    reason: str | None = None

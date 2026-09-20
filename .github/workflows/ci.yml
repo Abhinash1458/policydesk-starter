@@ -5,7 +5,8 @@
 #
 # Fails fast: if smoke fails, regression never runs; if regression fails, nothing deploys.
 # Vercel's own git auto-deploy is turned off in vercel.json so this workflow is the only way to ship.
-# Lab tests (marker `lab`) are excluded until students remove the marker — see tests/test_pricing.py.
+# Tests marked `lab` (Phase 2 / Phase 3 targets) are excluded, so the pipeline stays green while you build
+# and only turns red if something that already worked breaks.
 
 name: CI/CD
 

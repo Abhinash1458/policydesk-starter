@@ -1,7 +1,7 @@
-"""Lab 1 — quotes API."""
+"""Phase 2, Example 4 — quotes API. Needs the premium calculator."""
 import pytest
 
-pytestmark = pytest.mark.regression
+pytestmark = pytest.mark.lab
 
 
 def test_create_quote_returns_201_with_premium(client, ids):

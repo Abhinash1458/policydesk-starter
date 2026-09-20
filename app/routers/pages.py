@@ -1,6 +1,6 @@
 """Server-rendered HTML screens (Jinja2). The JSON API lives under /api/*.
 
-Screens: Dashboard · Get a Quote -> Issue Policy · Policies list/detail · File a Claim / Claim status
+Screens: Dashboard · Customers / Customer 360 · Products · Quotes / Get a Quote -> Issue Policy · Policies list/detail
 """
 from datetime import date
 from pathlib import Path
@@ -8,14 +8,10 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlmodel import Session, col, func, select
+from sqlmodel import Session, func, select
 
 from app.db import get_session
 from app.models import (
-    Claim,
-    ClaimCreate,
-    ClaimStatus,
-    ClaimStatusUpdate,
     Customer,
     CustomerCreate,
     Policy,
@@ -25,11 +21,9 @@ from app.models import (
     Quote,
     QuoteCreate,
 )
-from app.routers.claims import file_claim, update_claim_status
 from app.routers.policies import issue_policy
 from app.routers.quotes import price_quote
 from app.services import pricing
-from app.services.claims import ALLOWED_TRANSITIONS, remaining_cover
 
 router = APIRouter(include_in_schema=False)
 templates = Jinja2Templates(directory=Path(__file__).resolve().parent.parent / "templates")
@@ -55,7 +49,6 @@ def money(value: float | None) -> str:
 templates.env.filters["money"] = money
 templates.env.globals["today"] = date.today
 templates.env.globals["PolicyStatus"] = PolicyStatus
-templates.env.globals["ClaimStatus"] = ClaimStatus
 
 
 def render(request: Request, name: str, **ctx):
@@ -72,16 +65,9 @@ def dashboard(request: Request, session: Session = Depends(get_session)):
         "quotes": session.exec(select(func.count(Quote.id))).one(),
         "policies": session.exec(select(func.count(Policy.id))).one(),
         "active": session.exec(select(func.count(Policy.id)).where(Policy.status == PolicyStatus.ACTIVE)).one(),
-        "claims": session.exec(select(func.count(Claim.id))).one(),
-        "open_claims": session.exec(
-            select(func.count(Claim.id)).where(col(Claim.status).in_([ClaimStatus.FILED, ClaimStatus.UNDER_REVIEW]))
-        ).one(),
     }
     premium_collected = session.exec(
         select(func.coalesce(func.sum(Policy.premium), 0)).where(Policy.status != PolicyStatus.CANCELLED)
-    ).one()
-    claims_approved = session.exec(
-        select(func.coalesce(func.sum(Claim.amount), 0)).where(Claim.status == ClaimStatus.APPROVED)
     ).one()
     by_product = session.exec(
         select(Product.name, func.count(Policy.id))
@@ -90,16 +76,13 @@ def dashboard(request: Request, session: Session = Depends(get_session)):
         .order_by(Product.id)
     ).all()
     recent_policies = session.exec(select(Policy).order_by(Policy.created_at.desc()).limit(5)).all()
-    recent_claims = session.exec(select(Claim).order_by(Claim.created_at.desc()).limit(5)).all()
     return render(
         request,
         "dashboard.html",
         counts=counts,
         premium_collected=premium_collected,
-        claims_approved=claims_approved,
         by_product=by_product,
         recent_policies=recent_policies,
-        recent_claims=recent_claims,
     )
 
 
@@ -154,7 +137,6 @@ def customer_detail(request: Request, customer_id: int, session: Session = Depen
         raise HTTPException(404, "Customer not found")
     policies = sorted(customer.policies, key=lambda p: p.created_at, reverse=True)
     quotes = sorted(customer.quotes, key=lambda q: q.created_at, reverse=True)
-    claims = sorted((c for p in policies for c in p.claims), key=lambda c: c.created_at, reverse=True)
     return render(
         request,
         "customer_detail.html",
@@ -162,30 +144,8 @@ def customer_detail(request: Request, customer_id: int, session: Session = Depen
         age=pricing.age_on(customer.date_of_birth),
         policies=policies,
         quotes=quotes,
-        claims=claims,
         active_count=sum(1 for p in policies if p.status == PolicyStatus.ACTIVE),
         premium_total=sum(p.premium for p in policies if p.status != PolicyStatus.CANCELLED),
-    )
-
-
-@router.get("/claims/{claim_id}", response_class=HTMLResponse)
-def claim_detail(request: Request, claim_id: int, session: Session = Depends(get_session)):
-    """SCENARIO 3 — Claim review. Allowed actions come from the service, not the template."""
-    claim = session.get(Claim, claim_id)
-    if not claim:
-        raise HTTPException(404, "Claim not found")
-    remaining = remaining_cover(session, claim.policy)
-    return render(
-        request,
-        "claim_detail.html",
-        claim=claim,
-        policy=claim.policy,
-        remaining=remaining,
-        within_cover=claim.amount <= remaining,
-        next_states=sorted(ALLOWED_TRANSITIONS[claim.status], key=lambda s: s.value),
-        other_claims=[c for c in claim.policy.claims if c.id != claim.id],
-        flash=request.query_params.get("flash"),
-        error=request.query_params.get("error"),
     )
 
 
@@ -291,7 +251,6 @@ def policy_detail(request: Request, policy_id: int, session: Session = Depends(g
         request,
         "policy_detail.html",
         policy=policy,
-        remaining=remaining_cover(session, policy),
         flash=request.query_params.get("flash"),
         error=request.query_params.get("error"),
     )
@@ -308,62 +267,6 @@ def policy_status(policy_id: int, status: PolicyStatus = Form(...), session: Ses
     session.add(policy)
     session.commit()
     return RedirectResponse(f"/policies/{policy_id}?flash=Status+updated", status_code=303)
-
-
-# --------------------------------------------------------------------------- #
-# Claims
-# --------------------------------------------------------------------------- #
-@router.get("/claims", response_class=HTMLResponse)
-def claims_list(request: Request, status: str | None = None, session: Session = Depends(get_session)):
-    stmt = select(Claim).order_by(Claim.created_at.desc())
-    if status:
-        stmt = stmt.where(Claim.status == status)
-    return render(request, "claims.html", claims=session.exec(stmt).all(), status=status)
-
-
-@router.post("/policies/{policy_id}/claims")
-def claim_submit(
-    policy_id: int,
-    amount: float = Form(...),
-    description: str = Form(...),
-    incident_date: date = Form(...),
-    vehicle_registration: str = Form(""),
-    session: Session = Depends(get_session),
-):
-    try:
-        claim = file_claim(
-            ClaimCreate(
-                policy_id=policy_id,
-                amount=amount,
-                description=description,
-                incident_date=incident_date,
-                vehicle_registration=vehicle_registration or None,
-            ),
-            session,
-        )
-    except HTTPException as exc:
-        return RedirectResponse(f"/policies/{policy_id}?error={exc.detail}", status_code=303)
-    msg = "Claim+filed" if claim.status == ClaimStatus.FILED else "Claim+auto-rejected:+" + (claim.reason or "")
-    return RedirectResponse(f"/policies/{policy_id}?flash={msg}", status_code=303)
-
-
-@router.post("/claims/{claim_id}/status")
-def claim_status(
-    claim_id: int,
-    status: ClaimStatus = Form(...),
-    reason: str = Form(""),
-    back: str = Form(""),
-    session: Session = Depends(get_session),
-):
-    claim = session.get(Claim, claim_id)
-    if not claim:
-        raise HTTPException(404, "Claim not found")
-    back = back if back.startswith("/") else f"/policies/{claim.policy_id}"
-    try:
-        update_claim_status(claim_id, ClaimStatusUpdate(status=status, reason=reason or None), session)
-    except HTTPException as exc:
-        return RedirectResponse(f"{back}?error={exc.detail}", status_code=303)
-    return RedirectResponse(f"{back}?flash=Claim+marked+{status.value}", status_code=303)
 
 
 # --------------------------------------------------------------------------- #

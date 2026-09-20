@@ -12,7 +12,7 @@
     <div class="steps">
       <span class="step on">1 · Quote</span><span class="arrow">→</span>
       <span class="step on">2 · Policy</span><span class="arrow">→</span>
-      <span class="step on">3 · Claim</span>
+      <span class="step">3 · Claim</span>
     </div>
   </div>
 </div>
@@ -23,14 +23,12 @@
       <div><div class="band__value">{{ counts.policies }}</div><div class="band__label">Policies issued</div></div>
       <div><div class="band__value">{{ counts.active }}</div><div class="band__label">Active policies</div></div>
       <div><div class="band__value">{{ premium_collected | money }}</div><div class="band__label">Premium collected</div></div>
-      <div><div class="band__value">{{ counts.open_claims }}</div><div class="band__label">Open claims</div></div>
+      <div><div class="band__value">{{ counts.customers }}</div><div class="band__label">Customers</div></div>
     </div>
 
-    <div class="grid grid--4" style="margin-bottom:24px">
+    <div class="grid grid--2" style="margin-bottom:24px">
       <div class="card stat"><span class="icon-badge">👤</span><div><div class="stat__label">Customers</div><div class="stat__value">{{ counts.customers }}</div><div class="stat__hint"><a href="/customers">Manage →</a></div></div></div>
       <div class="card stat"><span class="icon-badge">🧮</span><div><div class="stat__label">Quotes</div><div class="stat__value">{{ counts.quotes }}</div><div class="stat__hint"><a href="/quotes">All quotes →</a></div></div></div>
-      <div class="card stat"><span class="icon-badge">🛡️</span><div><div class="stat__label">Claims filed</div><div class="stat__value">{{ counts.claims }}</div><div class="stat__hint"><a href="/claims">Review →</a></div></div></div>
-      <div class="card stat"><span class="icon-badge">💸</span><div><div class="stat__label">Claims paid</div><div class="stat__value">{{ claims_approved | money }}</div><div class="stat__hint">approved total</div></div></div>
     </div>
 
     <div class="grid grid--side">
@@ -67,21 +65,6 @@
             <b>{{ n }}</b>
           </div>
           {% endfor %}
-        </div>
-        <div class="card">
-          <div class="card__title"><span class="icon-badge">🛡️</span> Recent claims</div>
-          {% if recent_claims %}
-          <ul style="display:grid;gap:10px">
-            {% for c in recent_claims %}
-            <li style="display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:.9rem">
-              <span><a class="mono" href="/claims/{{ c.id }}">#{{ c.id }}</a> · <a class="mono small" href="/policies/{{ c.policy_id }}">{{ c.policy.policy_number }}</a><br><span class="muted small">{{ c.description[:40] }}</span></span>
-              <span style="text-align:right"><b>{{ c.amount | money }}</b><br>{{ pill(c.status) }}</span>
-            </li>
-            {% endfor %}
-          </ul>
-          {% else %}
-          <div class="empty small">No claims filed yet.</div>
-          {% endif %}
         </div>
       </div>
     </div>

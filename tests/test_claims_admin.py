@@ -1,10 +1,10 @@
-"""Phase 3 — admin approval: the review queue and the claim status workflow.
+"""Phase 3 — admin approval: review queue and status workflow. Acceptance tests for YOUR prompt.
 
 These are the acceptance tests for the feature you build with your OWN prompt. They fail until it is done.
 """
 import pytest
 
-pytestmark = pytest.mark.regression
+pytestmark = pytest.mark.lab
 
 
 def claim_for(policy, **overrides):

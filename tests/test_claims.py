@@ -1,7 +1,7 @@
-"""Phase 2 (Examples 1–3) — the Claim model, the filing endpoint and its four rules."""
+"""Phase 2, Examples 1–3 — the Claim model and POST /api/claims with its four rules. Fail on the starter by design."""
 import pytest
 
-pytestmark = pytest.mark.regression
+pytestmark = pytest.mark.lab
 
 
 def claim_for(policy, **overrides):

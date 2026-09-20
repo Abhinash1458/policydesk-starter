@@ -12,7 +12,7 @@
     <div class="steps">
       <span class="step done">1 · Quote</span><span class="arrow">→</span>
       <span class="step done">2 · Policy</span><span class="arrow">→</span>
-      <span class="step on">3 · Claim</span>
+      <span class="step">3 · Claim</span>
     </div>
   </div>
 </div>
@@ -20,14 +20,12 @@
 <section>
   <div class="container">
     {{ alerts(flash=flash, error=error) }}
-    <div class="grid grid--3" style="margin-bottom:20px">
+    <div class="grid grid--2" style="margin-bottom:20px">
       <div class="card stat"><span class="icon-badge">🛡️</span><div><div class="stat__label">Sum insured</div><div class="stat__value">{{ policy.sum_insured | money }}</div></div></div>
       <div class="card stat"><span class="icon-badge">💳</span><div><div class="stat__label">Annual premium</div><div class="stat__value">{{ policy.premium | money }}</div></div></div>
-      <div class="card stat"><span class="icon-badge">📉</span><div><div class="stat__label">Remaining cover</div><div class="stat__value">{{ remaining | money }}</div><div class="stat__hint">after approved claims</div></div></div>
     </div>
 
     <div class="grid grid--side">
-      <div style="display:grid;gap:20px">
         <div class="card">
           <div class="card__title"><span class="icon-badge">🧾</span> Details</div>
           <dl class="kv">
@@ -49,75 +47,11 @@
           {% endif %}
         </div>
 
-        <div class="card">
-          <div class="card__title"><span class="icon-badge">🛡️</span> Claims on this policy <span class="pill pill--plain">{{ policy.claims | length }}</span></div>
-          {% if policy.claims %}
-          <div class="table-wrap"><table>
-            <thead><tr><th>#</th><th>Incident</th><th>Description</th><th class="num">Amount</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody>
-            {% for c in policy.claims | sort(attribute='created_at', reverse=True) %}
-              <tr>
-                <td class="mono"><a href="/claims/{{ c.id }}">{{ c.id }}</a></td>
-                <td class="small">{{ c.incident_date.strftime('%d %b %Y') }}</td>
-                <td class="small">{{ c.description }}{% if c.reason %}<br><span class="muted">Reason: {{ c.reason }}</span>{% endif %}</td>
-                <td class="num">{{ c.amount | money }}</td>
-                <td>{{ pill(c.status) }}</td>
-                <td>
-                  {% if c.status.value == 'Filed' %}
-                  <form class="inline-form" method="post" action="/claims/{{ c.id }}/status">
-                    <button class="btn btn--ghost btn--sm" name="status" value="Under Review">Review</button>
-                    <button class="btn btn--danger btn--sm" name="status" value="Rejected">Reject</button>
-                  </form>
-                  {% elif c.status.value == 'Under Review' %}
-                  <form class="inline-form" method="post" action="/claims/{{ c.id }}/status">
-                    <button class="btn btn--ok btn--sm" name="status" value="Approved">Approve</button>
-                    <button class="btn btn--danger btn--sm" name="status" value="Rejected">Reject</button>
-                  </form>
-                  {% else %}<span class="muted small">—</span>{% endif %}
-                </td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table></div>
-          {% else %}
-          <div class="empty small">No claims yet.</div>
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card__title"><span class="icon-badge icon-badge--grad">📝</span> File a claim</div>
-        {% if policy.status.value == 'Active' %}
-        <form class="form" method="post" action="/policies/{{ policy.id }}/claims">
-          <div class="field">
-            <label for="amount">Claim amount (₹)</label>
-            <input type="number" name="amount" id="amount" min="1" step="100" max="{{ remaining }}" required>
-            <span class="hint">Up to {{ remaining | money }} remaining cover.</span>
-          </div>
-          <div class="field">
-            <label for="incident_date">Incident date</label>
-            <input type="date" name="incident_date" id="incident_date" value="{{ today().isoformat() }}" min="{{ policy.start_date }}" max="{{ policy.end_date }}" required>
-          </div>
-          <div class="field">
-            <label for="description">What happened?</label>
-            <textarea name="description" id="description" rows="3" minlength="5" maxlength="500" required placeholder="Describe the incident…"></textarea>
-          </div>
-          {% if policy.product.code.value == 'MOTOR' %}
-          <div class="field">
-            <label for="vehicle_registration">Vehicle registration</label>
-            <input type="text" name="vehicle_registration" id="vehicle_registration" value="{{ policy.vehicle_registration or '' }}" style="text-transform:uppercase">
-            <span class="hint">Required for Motor claims.</span>
-          </div>
-          {% endif %}
-          <div class="form__actions">
-            <button class="btn btn--primary" type="submit">File claim →</button>
-          </div>
-        </form>
-        {% elif policy.status.value == 'Cancelled' %}
-        <div class="alert alert--bad" style="margin:0">⚠️ <span>This policy is cancelled. Any claim filed via the API is auto-rejected.</span></div>
-        {% else %}
-        <div class="alert alert--info" style="margin:0">ℹ️ <span>Policy is {{ policy.status.value | lower }}. Reactivate it to file a claim.</span></div>
-        {% endif %}
+      <div class="card card--tint">
+        <div class="card__title"><span class="icon-badge icon-badge--grad">🛡️</span> Claims — coming in Phase 2</div>
+        <p class="small">A customer will be able to file a claim against this policy once the <span class="mono">Claim</span> model and the
+        <span class="mono">/api/claims</span> endpoints exist. Until then, use the policy status form on the left and the API docs at
+        <a href="/docs">/docs</a>.</p>
       </div>
     </div>
   </div>

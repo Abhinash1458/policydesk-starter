@@ -1,7 +1,7 @@
-"""Lab 2 — policies API."""
+"""Phase 2, Example 4 — issuing policies from new quotes. Needs the premium calculator."""
 import pytest
 
-pytestmark = pytest.mark.regression
+pytestmark = pytest.mark.lab
 
 
 def test_issue_policy_copies_quote_and_computes_period(client, health_policy):

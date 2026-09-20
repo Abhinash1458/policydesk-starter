@@ -1,17 +1,17 @@
-"""HTML screen tests — the given pages plus the three student scenarios (solution)."""
+"""HTML screen tests that create new quotes — they pass once the premium calculator (Phase 2, Example 4) is done."""
 import pytest
 
-pytestmark = pytest.mark.regression
+pytestmark = pytest.mark.lab
 
 
 def test_given_pages_render(client):
-    for path in ["/", "/customers", "/products", "/quotes/new", "/policies", "/claims"]:
+    for path in ["/", "/customers", "/products", "/quotes/new", "/policies"]:
         r = client.get(path)
         assert r.status_code == 200, path
         assert "PolicyDesk" in r.text
 
 
-# ---- Scenario 1: quotes list ----------------------------------------------------
+# ---- Quotes list --------------------------------------------------------------------
 
 def test_quotes_list_shows_open_and_converted(client, ids, health_policy):
     open_quote = client.post("/api/quotes", json={
@@ -33,16 +33,13 @@ def test_quotes_list_shows_open_and_converted(client, ids, health_policy):
     assert "No quotes" in client.get("/quotes?product=TERM_LIFE&status=converted").text   # seeded quotes are Health + Motor
 
 
-# ---- Scenario 2: customer 360 ---------------------------------------------------
+# ---- Customer 360 -------------------------------------------------------------------
 
-def test_customer_360_shows_policies_claims_and_premium_total(client, ids, health_policy):
-    client.post("/api/claims", json={"policy_id": health_policy["id"], "amount": 20000,
-                                     "description": "Day-care procedure", "incident_date": "2026-05-05"})
+def test_customer_360_shows_policies_and_premium_total(client, ids, health_policy):
     page = client.get(f"/customers/{ids['customers']['Priya Nair']}").text
     assert "Priya Nair" in page
     assert health_policy["policy_number"] in page
     assert "15,000.00" in page                     # premium total
-    assert "Day-care" not in page and "20,000.00" in page   # claims table shows amount, not description
     assert f'/quotes/new?customer_id={ids["customers"]["Priya Nair"]}' in page
 
 
@@ -53,37 +50,3 @@ def test_customer_360_with_no_policies_and_unknown_id(client, ids):
     page = client.get(f"/customers/{new['id']}")
     assert page.status_code == 200 and "No policies yet" in page.text
     assert client.get("/customers/999").status_code == 404
-
-
-# ---- Scenario 3: claim review ---------------------------------------------------
-
-def test_claim_review_offers_only_allowed_actions(client, health_policy):
-    cid = client.post("/api/claims", json={"policy_id": health_policy["id"], "amount": 50000,
-                                           "description": "Hospitalised for three days",
-                                           "incident_date": "2026-03-10"}).json()["id"]
-    page = client.get(f"/claims/{cid}").text
-    assert "Move to review" in page and "Reject" in page
-    assert 'value="Approved"' not in page                     # cannot approve straight from Filed
-
-    r = client.post(f"/claims/{cid}/status", data={"status": "Under Review", "back": f"/claims/{cid}"}, follow_redirects=False)
-    assert r.headers["location"].startswith(f"/claims/{cid}")
-    page = client.get(f"/claims/{cid}").text
-    assert 'value="Approved"' in page and "Move to review" not in page
-
-    client.post(f"/claims/{cid}/status", data={"status": "Approved", "reason": "Bills verified", "back": f"/claims/{cid}"})
-    page = client.get(f"/claims/{cid}").text
-    assert "final state" in page and "Bills verified" in page
-
-
-def test_claim_review_disables_approve_when_over_cover(client, health_policy):
-    a = client.post("/api/claims", json={"policy_id": health_policy["id"], "amount": 300000,
-                                         "description": "Surgery and stay", "incident_date": "2026-03-10"}).json()["id"]
-    b = client.post("/api/claims", json={"policy_id": health_policy["id"], "amount": 300000,
-                                         "description": "Follow-up surgery", "incident_date": "2026-04-10"}).json()["id"]
-    for cid in (a, b):
-        client.patch(f"/api/claims/{cid}/status", json={"status": "Under Review"})
-    client.patch(f"/api/claims/{a}/status", json={"status": "Approved"})
-    page = client.get(f"/claims/{b}").text
-    assert "Within cover?" in page and ">No<" in page
-    assert 'value="Approved" disabled' in page
-    assert client.get("/claims/999").status_code == 404
