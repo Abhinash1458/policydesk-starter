@@ -40,6 +40,8 @@ The commits you should have by the end:
 | Example 3 | `Phase 2.3: register claims router, init_db` |
 | Example 4 | `Phase 2.4: premium calculation` |
 | Phase 3 | `Phase 3: admin approval workflow` |
+| Day 2 Lab 1 | `Day 2 Lab 1: quotation calculator` |
+| Day 2 Lab 2 | `Day 2 Lab 2: issue policy and status` |
 
 `git log --oneline` should read like a story of the session.
 
@@ -52,7 +54,15 @@ Then open **your fork → Actions**. The pipeline runs **smoke (2) → regressio
 
 The pipeline ignores tests marked `lab` (your unfinished targets) — so it stays green while you work, and only your regressions turn it red.
 
-## 5 · If the original repo changes during the day (instructor says "pull the fix")
+## 5 · Day 2: branch → pull request (the deployment session)
+
+```
+git checkout -b team-<name>-claims
+git push -u origin team-<name>-claims
+```
+Then on GitHub: your fork → **Contribute → Open pull request** → base repository `Abhinash1458/policydesk-starter`, **base branch `workshop`** (not `main`), compare `team-<name>-claims`. The PR runs the pipeline; when the instructor merges it, the upstream `workshop` branch deploys to Vercel. Full steps: `docs/day2-deployment.md`.
+
+## 6 · If the original repo changes during the day (instructor says "pull the fix")
 
 ```
 git remote add upstream https://github.com/Abhinash1458/policydesk-starter.git   # once
@@ -60,7 +70,7 @@ git fetch upstream
 git merge upstream/main                   # resolve conflicts if any, then commit
 ```
 
-## 6 · Undo safely
+## 7 · Undo safely
 
 | I want to… | Command |
 |---|---|

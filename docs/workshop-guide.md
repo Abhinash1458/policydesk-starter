@@ -1,13 +1,24 @@
-# PolicyDesk workshop — 80 minutes, three phases
+# PolicyDesk workshop — two days
 
-*TalentPath Academy · AI-Powered SDLC · one session*
+*TalentPath Academy · AI-Powered SDLC*
 
-You are given a working insurance app — customers, products, quotes and policies — and you add the **claims** feature with AI, then build an **admin approval** workflow with a prompt you write yourself.
+You are given a working insurance app — customers, products, quotes and policies — and over two days you add the **claims** feature with guided prompts, build an **admin approval** workflow with a prompt you write yourself, then build the **quotation calculator** and **issue-policy** rules, and ship it all through a **CI → Vercel pipeline**.
+
+| Day | Session | Min | What happens | Guide |
+|---|---|---|---|---|
+| 1 | Phase 1 · Fork & explore | 25 | fork, run, read the code with Copilot | this page |
+| 1 | Phase 2 · Four prompts | 30 | Claim model → claim endpoints → DB tables → Claims page | `docs/phase2-prompts.md` |
+| 1 | Phase 3 · Your own prompt | 25 | admin approval: queue + Approve / Reject with reason | `docs/phase3-admin-approval.md` |
+| 2 | Lab 1 · Quotation calculator | 45 | the four premium functions | `docs/day2-lab1-quotation.md` |
+| 2 | Lab 2 · Issue a policy | 45 | `issue_policy` + status change | `docs/day2-lab2-issue-policy.md` |
+| 2 | Deployment pipeline | 30 | branch → PR → merge → Vercel deploys | `docs/day2-deployment.md` |
+
+## Day 1 — three phases (80 min)
 
 | Phase | Min | What happens | You end with |
 |---|---|---|---|
 | **1 · Fork & explore** | 25 | Fork the repo, run it, read the code with Copilot | Your own fork, app running, one commit |
-| **2 · Four prompts, real outputs** | 30 | Four worked prompts — Claim model → claim endpoints → database tables → premium logic | Claims API working, all tests green, four commits |
+| **2 · Four prompts, real outputs** | 30 | Four worked prompts — Claim model → claim endpoints → database tables → Claims page | Claims API + page working, four commits |
 | **3 · Your own prompt** | 25 | Write the prompt for the admin approval feature; acceptance tests tell you when you're done | Admin queue + status workflow, one commit, pushed |
 
 **One rule all session:** AI writes the first draft — you read every line, run the tests, and commit only what you understand.
@@ -35,7 +46,7 @@ Python 3.12+, Git, VS Code with Copilot, a GitHub account. `python check_setup.p
    uvicorn app.main:app --reload
    ```
 3. Open http://127.0.0.1:8000 — dashboard, 2 customers, 3 products, 2 policies already there. Open http://127.0.0.1:8000/docs — the API.
-4. `pytest -m "not lab"` → **15 passed**. (`pytest -m lab` fails — those are your targets for Phases 2 and 3.)
+4. `pytest -m "not lab"` → **15 passed**. (`pytest -m lab` fails — those are your targets for today and tomorrow.)
 
 ### 1.2 Read the code with Copilot (15 min)
 
@@ -71,9 +82,9 @@ Each example in `docs/phase2-prompts.md` has: the prompt to paste · what to att
 | 1 | 6 | Add the **Claim model** | `app/models.py` | `python -c "from app.models import Claim; print(Claim.__tablename__)"` → `claim` |
 | 2 | 10 | Add the **claim endpoints** | `app/routers/claims.py` (new) | file compiles; `POST /api/claims` appears in `/docs` after Example 3 |
 | 3 | 6 | **Create the database tables** and register the router | `app/main.py`, `app/init_db.py` (new) | `python -m app.init_db` lists a `claim` table; `pytest tests/test_claims.py` → 8 passed |
-| 4 | 8 | Add the **premium calculation logic** | `app/services/pricing.py` | `pytest tests/test_pricing.py tests/test_quotes.py` green; *Get a quote* → ₹15,000.00 |
+| 4 | 8 | Add the **Claims page** | `app/routers/pages.py`, `app/templates/claims.html`, nav link | `/claims` lists the claim you filed; tabs filter by status |
 
-After Example 4: `pytest -m "not lab"` still green, and `pytest tests/test_pricing.py tests/test_quotes.py tests/test_policies.py tests/test_claims.py tests/test_pages.py` → all green.
+After Example 4: `pytest -m "not lab"` still green and `pytest tests/test_claims.py` → 8 passed. (Quotes still answer 501 — the calculator is Day 2.)
 
 ---
 
@@ -86,10 +97,24 @@ Brief, rules, a prompt-writing template and the acceptance tests are in `docs/ph
 - 5–20 · Run it, read the output, run `pytest tests/test_claims_admin.py` (6 tests). Iterate on the *prompt*, not just the code.
 - 20–25 · Commit, push, open the Actions tab on your fork — the CI pipeline runs smoke → regression.
 
-**Done when:** `pytest` (everything, no marker) is green · `PATCH /api/claims/{id}/status` follows the workflow · `GET /api/claims?status=Filed` is the queue · pushed to your fork.
+**Done when:** `pytest tests/test_claims_admin.py` → 6 passed · `PATCH /api/claims/{id}/status` follows the workflow · `GET /api/claims?status=Filed` is the queue · pushed to your fork.
 
 ---
 
-## Wrap-up (last 5 min of Phase 3)
+## Day 1 wrap-up (last 5 min)
 
 Each team: one thing the AI got wrong today and how you caught it. The handout (`docs/handout.md`) has a table for it.
+
+---
+
+## Day 2 — two labs and the pipeline (120 min)
+
+Same loop as Day 1 — prompt → read → test → commit — but now the rules are the *business* of insurance: money and dates.
+
+| | Min | You build | Done when |
+|---|---|---|---|
+| **Lab 1 · Quotation calculator** | 45 | `age_factor`, `tenure_factor`, `add_on_factor`, `calculate_premium` in `app/services/pricing.py` | `pytest tests/test_pricing.py tests/test_quotes.py tests/test_pages.py` green · *Get a quote* → ₹15,000.00 |
+| **Lab 2 · Issue a policy** | 45 | `issue_policy` and `update_policy_status` in `app/routers/policies.py` | `pytest` → **80 passed** · issue → 31 Dec end date → re-issue 409 → cancel → 409 |
+| **Deployment pipeline** | 30 | branch → push → one team's PR to upstream `workshop` → merge → Vercel deploy | live `/health` on the projector |
+
+Behind on Day 1? `git fetch upstream && git checkout upstream/solution -- app/routers/claims.py app/templates/claims.html` gives you the claims feature so Day 2 can start.

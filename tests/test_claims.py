@@ -1,6 +1,8 @@
 """Phase 2, Examples 1–3 — the Claim model and POST /api/claims with its four rules. Fail on the starter by design."""
 import pytest
 
+from app.models import Policy, PolicyStatus
+
 pytestmark = pytest.mark.lab
 
 
@@ -12,6 +14,14 @@ def claim_for(policy, **overrides):
 
 
 # ---- filing ---------------------------------------------------------------------
+
+def set_policy_status(session, policy_id, new_status):
+    """Change a policy's status straight in the database (the PATCH endpoint is a Day 2 lab)."""
+    policy = session.get(Policy, policy_id)
+    policy.status = new_status
+    session.add(policy)
+    session.commit()
+
 
 def test_valid_claim_is_filed(client, health_policy):
     r = client.post("/api/claims", json=claim_for(health_policy))
@@ -40,13 +50,13 @@ def test_motor_claim_needs_vehicle_registration(client, motor_policy):
     assert client.post("/api/claims", json=payload).status_code == 201
 
 
-def test_lapsed_policy_refuses_claim(client, health_policy):
-    client.patch(f"/api/policies/{health_policy['id']}/status", json={"status": "Lapsed"})
+def test_lapsed_policy_refuses_claim(client, session, health_policy):
+    set_policy_status(session, health_policy["id"], PolicyStatus.LAPSED)
     assert client.post("/api/claims", json=claim_for(health_policy)).status_code == 422
 
 
-def test_cancelled_policy_auto_rejects_claim(client, health_policy):
-    client.patch(f"/api/policies/{health_policy['id']}/status", json={"status": "Cancelled"})
+def test_cancelled_policy_auto_rejects_claim(client, session, health_policy):
+    set_policy_status(session, health_policy["id"], PolicyStatus.CANCELLED)
     r = client.post("/api/claims", json=claim_for(health_policy))
     assert r.status_code == 201
     assert r.json()["status"] == "Rejected"

@@ -1,6 +1,6 @@
 # Phase 2 — Four prompts with actual code outputs
 
-*30 minutes · do them in order · commit after each*
+*Day 1 · 30 minutes · do them in order · commit after each*
 
 How to read each example: 📎 attach these files in Copilot Chat (`#file:`) · 💬 paste the prompt · **Output** — the code you should end up with (compare line by line; AI wording may differ, behaviour must not) · ▶ run · 🔍 check · ⚠️ what AI usually gets wrong.
 
@@ -297,106 +297,120 @@ Database: sqlite:///./policydesk.db
 
 ---
 
-## Example 4 — Add the premium calculation logic to `app/services/pricing.py` (8 min)
+## Example 4 — Add the Claims page (8 min)
 
-The rules are in the docstring at the top of the file — attach it and reference it. One function per prompt is safest; here is the single prompt that produces all four when the constraints are explicit.
+The API works; now give the claims officer a screen. This example shows AI generating **UI** from an existing template — the pattern is "copy the style of page X".
 
-📎 `#file:app/services/pricing.py`
+📎 `#file:app/routers/pages.py` `#file:app/templates/policies.html` `#file:app/templates/_macros.html` `#file:app/templates/base.html`
 
 💬
 ```
-ROLE: senior Python engineer. CONTEXT: the attached file — the rules are in its module docstring; keep every signature.
-TASK: replace the four NotImplementedError stubs.
- age_factor: age < 0 -> PricingError("Age cannot be negative"); age < 25 -> 1.2 if product == ProductCode.MOTOR else 0.8;
-   age <= 45 -> 1.0; age <= 60 -> 1.3; else 1.6.   (25 is NOT under 25.)
- tenure_factor: TENURE_FACTORS[tenure_years]; KeyError -> PricingError(f"Tenure must be 1, 2 or 3 years (got {tenure_years})").
- add_on_factor: factor = 1.0; for each code: strip+upper; skip blanks; if code not in ADD_ONS[product] -> PricingError
-   (f"Add-on {code} is not available for {product.value}"); else factor += ADD_ONS[product][code]. ADD, do not multiply.
- calculate_premium: sum_insured <= 0 -> PricingError("Sum insured must be positive"); below min_sum_insured (when given) ->
-   PricingError(f"Sum insured must be at least {min_sum_insured:,.0f}"); above max -> PricingError(f"Sum insured cannot exceed {max_sum_insured:,.0f}");
-   premium = sum_insured * base_rate * age_factor * tenure_factor * add_on_factor(product, add_ons or []);
-   return round(max(premium, MIN_PREMIUM), 2).
-CONSTRAINTS: no new imports. FORMAT: the four functions only.
+ROLE: senior FastAPI + Jinja2 engineer. CONTEXT: pages.py renders the HTML screens; policies.html is the list page to copy.
+TASK, three parts:
+ 1. In app/routers/pages.py: import Claim and ClaimStatus from app.models; add templates.env.globals["ClaimStatus"] = ClaimStatus
+    next to the PolicyStatus global; add a route GET "/claims" -> claims_list(request, status: str | None = None, session)
+    that selects Claim ordered by created_at desc, filters by status when given, and renders "claims.html" with claims and status.
+ 2. Create app/templates/claims.html in exactly the style of policies.html: page-head (eyebrow "Claims", h1 "Claim <span class="hl">status</span>",
+    p "{{ claims|length }} shown" plus "· filtered by {{ status }}" when set), tabs All + one per ClaimStatus value (?status=<value>),
+    a card with a table: # · policy number (link /policies/{{ c.policy_id }}) · customer name (link /customers/{{ c.policy.customer_id }}) ·
+    incident date (%d %b %Y) · description with "Reason: …" underneath when c.reason · amount via the money filter · pill(c.status).
+    Empty state: "No claims" (+ " with status X" when filtered). Start with {% from "_macros.html" import pill %}.
+ 3. In app/templates/base.html add a nav link <a href="/claims" class="{{ 'active' if path.startswith('/claims') }}">Claims</a> after Policies.
+CONSTRAINTS: reuse the existing CSS classes only (page-head, eyebrow, hl, tabs, card, table-wrap, pill, btn); no new CSS, no JS.
+FORMAT: the pages.py additions, the complete claims.html, the one base.html line.
 ```
 
-**Output** — the four functions in `app/services/pricing.py`:
+**Output** — `app/routers/pages.py` additions:
 
 ```python
-def age_factor(age: int, product: ProductCode) -> float:
-    """Return the multiplier for this age band and product. See the rules at the top of the file."""
-    if age < 0:
-        raise PricingError("Age cannot be negative")
-    if age < 25:
-        return 1.2 if product == ProductCode.MOTOR else 0.8
-    if age <= 45:
-        return 1.0
-    if age <= 60:
-        return 1.3
-    return 1.6
+from app.models import (          # add Claim and ClaimStatus to the existing import list
+    Claim,
+    ClaimStatus,
+    ...
+)
+
+templates.env.globals["ClaimStatus"] = ClaimStatus     # next to the PolicyStatus global
 
 
-def tenure_factor(tenure_years: int) -> float:
-    """Return the tenure discount multiplier, or raise PricingError for an unsupported tenure."""
-    try:
-        return TENURE_FACTORS[tenure_years]
-    except KeyError:
-        raise PricingError(f"Tenure must be 1, 2 or 3 years (got {tenure_years})") from None
-
-
-def add_on_factor(product: ProductCode, add_ons: list[str]) -> float:
-    """1.0 plus the sum of every valid add-on loading for this product. Blank entries are ignored."""
-    available = ADD_ONS[product]
-    factor = 1.0
-    for code in add_ons:
-        code = code.strip().upper()
-        if not code:
-            continue
-        if code not in available:
-            raise PricingError(f"Add-on {code} is not available for {product.value}")
-        factor += available[code]
-    return factor
-
-
-def calculate_premium(
-    *,
-    sum_insured: float,
-    base_rate: float,
-    age: int,
-    tenure_years: int,
-    product: ProductCode,
-    add_ons: list[str] | None = None,
-    min_sum_insured: float | None = None,
-    max_sum_insured: float | None = None,
-) -> float:
-    """Return the annual premium in rupees, rounded to 2 decimals and never below MIN_PREMIUM."""
-    if sum_insured <= 0:
-        raise PricingError("Sum insured must be positive")
-    if min_sum_insured is not None and sum_insured < min_sum_insured:
-        raise PricingError(f"Sum insured must be at least {min_sum_insured:,.0f}")
-    if max_sum_insured is not None and sum_insured > max_sum_insured:
-        raise PricingError(f"Sum insured cannot exceed {max_sum_insured:,.0f}")
-
-    premium = (
-        sum_insured
-        * base_rate
-        * age_factor(age, product)
-        * tenure_factor(tenure_years)
-        * add_on_factor(product, add_ons or [])
-    )
-    return round(max(premium, MIN_PREMIUM), 2)
+# --------------------------------------------------------------------------- #
+# Claims
+# --------------------------------------------------------------------------- #
+@router.get("/claims", response_class=HTMLResponse)
+def claims_list(request: Request, status: str | None = None, session: Session = Depends(get_session)):
+    stmt = select(Claim).order_by(Claim.created_at.desc())
+    if status:
+        stmt = stmt.where(Claim.status == status)
+    return render(request, "claims.html", claims=session.exec(stmt).all(), status=status)
 ```
 
-▶ `pytest tests/test_pricing.py tests/test_quotes.py tests/test_policies.py tests/test_pages.py -q`
-🔍 all green. By hand: 5,00,000 × 0.03 × 1.0 × 1.0 = **15,000.0**. In the browser: *Get a quote* → Priya Nair · Health Shield · 500000 · 1 year → **₹15,000.00**. `age_factor(25, ProductCode.MOTOR)` must be **1.0**.
-⚠️ `age <= 25` (the single most common bug) · multiplies add-on loadings instead of adding · rounds before applying the minimum · returns an `int`.
+**Output** — `app/templates/claims.html`:
 
-**Commit:** `git commit -am "Phase 2.4: premium calculation"` then `git push`.
+```html
+{% extends "base.html" %}
+{% from "_macros.html" import pill %}
+{% block title %}Claims{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <div>
+      <span class="eyebrow">Claims</span>
+      <h1>Claim <span class="hl">status</span></h1>
+      <p>{{ claims | length }} shown{% if status %} · filtered by {{ status }}{% endif %}.</p>
+    </div>
+    <a class="btn btn--ghost" href="/policies">Browse policies</a>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="tabs">
+      <a href="/claims" class="{{ 'on' if not status }}">All</a>
+      {% for s in ClaimStatus %}<a href="/claims?status={{ s.value }}" class="{{ 'on' if status == s.value }}">{{ s.value }}</a>{% endfor %}
+    </div>
+    <div class="card" style="padding:0">
+      {% if claims %}
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Policy</th><th>Customer</th><th>Incident</th><th>Description</th><th class="num">Amount</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for c in claims %}
+          <tr>
+            <td class="mono">{{ c.id }}</td>
+            <td><a class="mono" href="/policies/{{ c.policy_id }}">{{ c.policy.policy_number }}</a></td>
+            <td><a href="/customers/{{ c.policy.customer_id }}">{{ c.policy.customer.name }}</a></td>
+            <td class="small">{{ c.incident_date.strftime('%d %b %Y') }}</td>
+            <td class="small">{{ c.description }}{% if c.reason %}<br><span class="muted">Reason: {{ c.reason }}</span>{% endif %}</td>
+            <td class="num">{{ c.amount | money }}</td>
+            <td>{{ pill(c.status) }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+      {% else %}
+      <div class="empty">No claims{% if status %} with status {{ status }}{% endif %}.</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+```
+
+**Output** — `app/templates/base.html` (one line, after the Policies link):
+
+```html
+        <a href="/claims" class="{{ 'active' if path.startswith('/claims') }}">Claims</a>
+```
+
+▶ Restart `uvicorn` (templates reload; new routes need a restart) → http://127.0.0.1:8000/claims
+🔍 The claim you filed in Example 3 is listed with a **Filed** pill; the *Filed* tab shows it, the *Approved* tab shows the empty state. The `pill` macro colours the status automatically. `pytest -m "not lab"` still green.
+⚠️ AI writes `c.customer.name` (Claim has no customer — go through `c.policy.customer`) · forgets the `ClaimStatus` global, so the tabs loop crashes with `UndefinedError` · invents CSS classes that don't exist in `theme.css`.
+
+**Commit:** `git add -A && git commit -m "Phase 2.4: claims page"` then `git push`.
 
 ---
 
 ## End of Phase 2 — checklist
 
-- [ ] `pytest -q` shows only `tests/test_claims_admin.py` failing (6 tests — that's Phase 3)
-- [ ] `/docs` lists customers, products, quotes, policies, **claims**
+- [ ] `pytest -m "not lab"` green; `pytest tests/test_claims.py` → 8 passed (the remaining `lab` tests are Phase 3 and Day 2)
+- [ ] `/docs` lists customers, products, quotes, policies, **claims** · the **Claims** page is in the nav
 - [ ] Four commits on your fork, pushed; the Actions tab shows a green run
 - [ ] You can explain every function you committed

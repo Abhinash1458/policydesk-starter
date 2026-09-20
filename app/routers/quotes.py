@@ -40,7 +40,7 @@ def price_quote(payload: QuoteCreate, session: Session) -> tuple[float, Customer
         )
     except pricing.PricingError as exc:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from exc
-    except NotImplementedError as exc:  # premium calculator not written yet (Phase 2, Example 4)
+    except NotImplementedError as exc:  # premium calculator not written yet (Day 2, Lab 1)
         raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, str(exc)) from exc
     return premium, customer, product
 

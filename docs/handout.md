@@ -4,11 +4,14 @@
 
 ## The session in one line each
 
-| Phase | Min | You | Done when |
+| Day · session | Min | You | Done when |
 |---|---|---|---|
-| 1 Fork & explore | 25 | fork → clone → run → 3 read-the-code prompts | app on :8000, `pytest -m "not lab"` = 15 passed, 1 commit |
-| 2 Four prompts | 30 | Claim model → claim endpoints → DB tables → premium logic | `pytest` shows only `test_claims_admin.py` red, 4 commits |
-| 3 Your prompt | 25 | admin approval workflow, prompt written by you | `pytest` = 80 passed, pushed, Actions green |
+| 1 · Phase 1 Fork & explore | 25 | fork → clone → run → 3 read-the-code prompts | app on :8000, `pytest -m "not lab"` = 15 passed, 1 commit |
+| 1 · Phase 2 Four prompts | 30 | Claim model → claim endpoints → DB tables → Claims page | `pytest tests/test_claims.py` = 8 passed, 4 commits |
+| 1 · Phase 3 Your prompt | 25 | admin approval workflow, prompt written by you | `pytest tests/test_claims_admin.py` = 6 passed, pushed |
+| 2 · Lab 1 Quotation | 45 | four premium functions in `pricing.py` | pricing + quotes tests green, ₹15,000.00 on screen |
+| 2 · Lab 2 Issue policy | 45 | `issue_policy` + `update_policy_status` | `pytest` = 80 passed |
+| 2 · Deployment | 30 | branch → push → PR to upstream `workshop` → merge → Vercel | live `/health` |
 
 ## Commands
 
@@ -20,6 +23,7 @@ pytest tests/test_claims.py -v              # one file, verbose
 pytest                                      # everything (80 at the end)
 python -m app.init_db                       # create missing tables + seed, list tables
 git add -A && git commit -m "..." && git push
+git checkout -b team-<name>-claims && git push -u origin team-<name>-claims   # Day 2: branch for the PR
 ```
 
 ## The prompt pattern (every time)
@@ -54,6 +58,8 @@ FORMAT      "Only the function" / "The complete file".
 | Test fixtures (`client`, `ids`, `health_policy`, `motor_policy`) | `tests/conftest.py` |
 | The four Phase 2 prompts + outputs | `docs/phase2-prompts.md` |
 | Phase 3 brief + acceptance tests | `docs/phase3-admin-approval.md`, `tests/test_claims_admin.py` |
+| Day 2 labs | `docs/day2-lab1-quotation.md`, `docs/day2-lab2-issue-policy.md` |
+| Deployment steps | `docs/day2-deployment.md` |
 | Git steps | `docs/git-workflow.md` |
 
 Seeded data: customers **Priya Nair** (id 1, Health policy `PD-HEALTH-2026-00001`, ₹5,00,000, 2026-01-01 → 2026-12-31) and **Rohan Das** (id 2, Motor policy `PD-MOTOR-2026-00002`, ₹8,00,000, vehicle `TS09AB1234`, 2026-03-01 → 2028-02-28).
@@ -66,7 +72,10 @@ Seeded data: customers **Priya Nair** (id 1, Health policy `PD-HEALTH-2026-00001
 | `'python' is not recognized` / opens Microsoft Store | reinstall Python with *Add to PATH* ticked, or use `py -3.12`; Settings → App execution aliases → turn off `python` |
 | `Activate.ps1 cannot be loaded` | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, or use `.venv\Scripts\activate.bat` |
 | `uvicorn: address already in use` | an old server is running — `Ctrl+C` there, or `--port 8001` |
-| Page shows **501 "Phase 2, Example 4: implement calculate_premium"** | expected until Example 4 — the calculator isn't written yet |
+| **501 "Day 2, Lab 1: implement calculate_premium"** on the quote form | expected until Day 2 Lab 1 |
+| **501 "Day 2, Lab 2: implement issue_policy"** on a quote page | expected until Day 2 Lab 2 |
+| `end_date` is 1 Jan instead of 31 Dec | missing the −1 day in `issue_policy` |
+| `age_factor(25, MOTOR)` returns 1.2 | `<= 25` — should be `< 25` |
 | `/api/claims` → 404 Not Found | router not registered — Example 3 (`include_router` in `main.py`); restart uvicorn |
 | `sqlite3.OperationalError: no such table: claim` | run `python -m app.init_db` (or delete `policydesk.db` and restart) |
 | `ImportError: cannot import name 'Claim'` | Example 1 not saved, or `Claim` defined *after* it's used — check `models.py` order |
@@ -82,7 +91,7 @@ Seeded data: customers **Priya Nair** (id 1, Health policy `PD-HEALTH-2026-00001
 
 ## What the AI got wrong today (fill in — 3 rows minimum)
 
-| Phase | What we asked | What it got wrong | How we caught it | Fix |
+| Day/session | What we asked | What it got wrong | How we caught it | Fix |
 |---|---|---|---|---|
 | | | | | |
 | | | | | |

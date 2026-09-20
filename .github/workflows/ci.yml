@@ -1,7 +1,10 @@
 # PolicyDesk CI/CD — runs on GitHub's free hosted runner (ubuntu-latest).
 #
 #   smoke (2 tests)  ──►  regression (all)  ──►  deploy-render (main)
-#                                          └──►  deploy-vercel (main + solution, Vercel CLI)
+#                                          └──►  deploy-vercel (main + solution + workshop, Vercel CLI)
+#
+# Day 2 deployment session: students push to a branch on their fork, one team opens a PR against the upstream
+# `workshop` branch, the PR run shows smoke -> regression, the instructor merges, the push to `workshop` deploys to Vercel.
 #
 # Fails fast: if smoke fails, regression never runs; if regression fails, nothing deploys.
 # Vercel's own git auto-deploy is turned off in vercel.json so this workflow is the only way to ship.
@@ -12,9 +15,9 @@ name: CI/CD
 
 on:
   push:
-    branches: [main, solution]
+    branches: [main, solution, workshop]
   pull_request:
-    branches: [main]
+    branches: [main, workshop]   # PRs from student forks target `workshop`
   workflow_dispatch:        # "Run workflow" button — useful during the trainer's deployment demo
 
 permissions:
@@ -83,7 +86,7 @@ jobs:
   deploy-vercel:
     name: Deploy to Vercel
     needs: regression
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/solution')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/solution' || github.ref == 'refs/heads/workshop')
     runs-on: ubuntu-latest
     environment: production
     env:
