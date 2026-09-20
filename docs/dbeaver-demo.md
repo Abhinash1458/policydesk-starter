@@ -1,9 +1,9 @@
 # Look inside the database — DBeaver demo (5 min)
 
-*Use after issuing the first policy in Lab 2, or at the start of the deployment session.*
+*Use right after Phase 2, Example 3 — the moment the `claim` table appears.*
 
-**The point:** the app is just Python writing rows into tables. When you click *Issue policy*, `session.commit()` in
-`issue_policy()` inserts one row into `policy`. Nothing magic — and you can see it.
+**The point:** the app is just Python writing rows into tables. When you `POST /api/claims`, `session.commit()` in
+`file_claim()` inserts one row into `claim`. Nothing magic — and you can see it.
 
 ## Where the data is
 
@@ -26,10 +26,10 @@
 
 ## The demo
 
-1. **Before:** open `policy` → *Data* tab. Count the rows.
-2. In the browser: *Get a quote* → issue the policy.
-3. **After:** back in DBeaver, **F5**. One new row: `policy_number`, `end_date` (computed — start + 365×tenure − 1), `premium` (copied from the quote), `status = ACTIVE`.
-4. Open the **ER Diagram** tab on the database → the five tables and their foreign keys. Compare with the Mermaid ERD from the Day 1 design exercise: what did the AI miss?
+1. **Before:** open `claim` → *Data* tab. Zero rows.
+2. In `/docs`: `POST /api/claims` with `{"policy_id": 1, "amount": 50000, "description": "Hospitalised for three days", "incident_date": "2026-03-10"}`.
+3. **After:** back in DBeaver, **F5**. One new row: `status = FILED`, `reason = NULL`, `created_at` set by the system.
+4. Open the **ER Diagram** tab on the database → the five tables and their foreign keys. Which table did you add today? Which foreign key links it?
 5. **SQL Editor** (Ctrl+]) — run these, one at a time:
 
 ```sql
@@ -51,7 +51,7 @@ GROUP BY p.id;
 SELECT q.id, q.premium FROM quote q LEFT JOIN policy p ON p.quote_id = q.id WHERE p.id IS NULL;
 ```
 
-6. **Break the rule from the outside:** in the `policy` Data tab, edit a row's `status` to `CANCELLED` and press **Save** (Ctrl+S). Back in the app, file a claim on that policy → it's auto-rejected. *The rule lives in the code; the data lives in the table.*
+6. **Break the rule from the outside:** in the `policy` Data tab, edit policy 2's `status` to `CANCELLED` and press **Save** (Ctrl+S). Back in `/docs`, file a claim on policy 2 → it comes back **201 with status Rejected** and the reason. *The rule lives in the code; the data lives in the table.*
 
 ## Questions to ask the room
 

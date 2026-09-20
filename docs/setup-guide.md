@@ -2,12 +2,12 @@
 
 *Software requirements and installation steps — for every participant*
 
-Do all of this **before Day 1**. It takes about 60–90 minutes on a normal home connection. Every step ends with a way to check it worked, and `check_setup.py` verifies everything at the end.
+Do all of this **before the workshop**. It takes about 60–90 minutes on a normal home connection. Every step ends with a way to check it worked, and `check_setup.py` verifies everything at the end.
 
 | | |
 |---|---|
-| **Timing** | Sessions start at 9:00 AM IST · 3 hours of session each day, not counting the break |
-| **Before Day 1** | Complete every step and bring the `check_setup.py` output (or a screenshot) with you |
+| **Timing** | One session of 80 minutes: 25 min explore · 30 min guided prompts · 25 min your own prompt |
+| **Before the workshop** | Complete every step and bring the `check_setup.py` output (or a screenshot) with you |
 | **Platforms** | Windows 10/11 (primary), macOS 12+, Ubuntu 22.04/24.04 |
 | **Cost** | Everything in this guide is free — no credit card is needed anywhere |
 | **Help** | info@talentpathacademy.com · +91 87900 02007 |
@@ -27,7 +27,7 @@ Nine things, all free. Install them **in this order** — later steps depend on 
 | 5 | GitHub account | — | Hosts your team's repo, signs you into Copilot and Render |
 | 6 | GitHub Copilot | Free tier, or Pro via Student Pack | AI code completion and chat inside VS Code |
 | 7 | AI chat account | any one | ChatGPT, Claude.ai or Gemini — for requirements, design, test-case and review prompts |
-| 8 | Render account | — | Deploys your app to a public URL on Day 2 |
+| 8 | Render account | — | Optional — only for the deployment demo |
 | 9 | Project setup | — | Clone the starter, create a virtual environment, run `check_setup.py` |
 
 ### Minimum laptop requirements
@@ -151,7 +151,7 @@ Skip this if you already have one — but do complete the email verification and
 1. Go to https://github.com/signup. Use an email you can open on your phone during the workshop (your college email is ideal — it also unlocks the Student Pack in Step 6).
 2. Pick a professional username; it will appear on your project URL and in your demo.
 3. Open the verification email and click the link. **Unverified accounts cannot enable Copilot.**
-4. Turn on two-factor authentication: *Settings → Password and authentication → Enable two-factor authentication → Authenticator app* (Google Authenticator / Microsoft Authenticator). It takes 3 minutes now versus a blocked morning on Day 1.
+4. Turn on two-factor authentication: *Settings → Password and authentication → Enable two-factor authentication → Authenticator app* (Google Authenticator / Microsoft Authenticator). It takes 3 minutes now versus a blocked start of the workshop.
 5. Sign in to GitHub from VS Code: click the Accounts icon (bottom-left, person silhouette) → *Sign in with GitHub* → authorise in the browser.
 
 **Check** — In VS Code the Accounts icon shows your GitHub username when clicked.
@@ -207,11 +207,11 @@ The labs on requirements, design, test cases and code review use a chat assistan
 
 ## 9. Step 8 — Create a Render account
 
-Render hosts the app on a public URL on Day 2. The free plan needs no card.
+Render hosts the app on a public URL (optional demo). The free plan needs no card.
 
 1. Go to https://render.com and click *Get Started → Sign up with GitHub*.
-2. Authorise Render to access your GitHub account. When asked which repositories, choose **All repositories** (or you will have to come back for your team repo on Day 2).
-3. Verify your email if Render asks. You land on the Dashboard — that is enough for now; we create the web service together in the deployment session on Day 2.
+2. Authorise Render to access your GitHub account. When asked which repositories, choose **All repositories** (or you will have to come back for your fork later).
+3. Verify your email if Render asks. You land on the Dashboard — that is enough for now; used only if the instructor runs the optional deployment demo.
 
 **Check** — https://dashboard.render.com opens and shows your GitHub username at top-right.
 
@@ -219,13 +219,13 @@ Render hosts the app on a public URL on Day 2. The free plan needs no card.
 
 ## 10. Step 9 — Set up the project and run the checker
 
-The starter repository is public: **https://github.com/Abhinash1458/policydesk-starter**. These commands clone it, create an isolated Python environment, install the libraries, and run the app once.
+The starter repository is public: **https://github.com/Abhinash1458/policydesk-starter**. **Fork it first** (the *Fork* button, top right, keep the name) — you will push to your own copy, not to the original. Then these commands clone **your fork**, create an isolated Python environment, install the libraries, and run the app once. Replace `<your-username>` with your GitHub username.
 
 **Windows (PowerShell)**
 
 ```
 cd $HOME\Documents
-git clone https://github.com/Abhinash1458/policydesk-starter.git
+git clone https://github.com/<your-username>/policydesk-starter.git
 cd policydesk-starter
 python -m venv .venv
 .venv\Scripts\Activate.ps1
@@ -241,7 +241,7 @@ uvicorn app.main:app --reload
 
 ```
 cd ~/Documents
-git clone https://github.com/Abhinash1458/policydesk-starter.git
+git clone https://github.com/<your-username>/policydesk-starter.git
 cd policydesk-starter
 python3 -m venv .venv
 source .venv/bin/activate
@@ -255,7 +255,7 @@ uvicorn app.main:app --reload
 
 - After activating, the prompt starts with `(.venv)`.
 - `pip install` ends with *Successfully installed fastapi-… uvicorn-… sqlmodel-…*
-- `python check_setup.py` prints `[OK]` on every line and **ALL CHECKS PASSED** at the bottom. **Screenshot this** — it is your ticket for the setup-check at 9:00 AM on Day 1.
+- `python check_setup.py` prints `[OK]` on every line and **ALL CHECKS PASSED** at the bottom. **Screenshot this** — it is your ticket for the setup-check at the start of the workshop.
 - `uvicorn` prints *Uvicorn running on http://127.0.0.1:8000*. Open **http://127.0.0.1:8000** in a browser — the PolicyDesk dashboard loads (and http://127.0.0.1:8000/docs shows the API). Press `Ctrl+C` to stop it.
 - Open the folder in VS Code (`code .`). Bottom-right, the Python interpreter should read *3.12.x ('.venv')*. If it shows a different Python, press `Ctrl+Shift+P` → *Python: Select Interpreter* → choose the `.venv` entry.
 
@@ -263,7 +263,7 @@ You can also run the checker standalone before cloning: download `check_setup.py
 
 ---
 
-## 11. Final checklist — tick every line before Day 1
+## 11. Final checklist — tick every line before the workshop
 
 | ✔ | Check | Command / where to look | Expected |
 |---|---|---|---|
@@ -280,7 +280,7 @@ You can also run the checker standalone before cloning: download `check_setup.py
 | ☐ | Student Pack applied | education.github.com | Pending or Approved |
 | ☐ | AI chat account | chatgpt.com / claude.ai / gemini.google.com | logged in |
 | ☐ | Render account | dashboard.render.com | dashboard opens |
-| ☐ | Starter cloned, venv, packages | `pip install -r requirements.txt` | Successfully installed … |
+| ☐ | Repo **forked**, your fork cloned, venv, packages | `git remote -v` shows your username; `pip install -r requirements.txt` | Successfully installed … |
 | ☐ | check_setup.py | `python check_setup.py` | ALL CHECKS PASSED |
 | ☐ | App runs | `uvicorn app.main:app --reload` | http://127.0.0.1:8000 loads |
 
