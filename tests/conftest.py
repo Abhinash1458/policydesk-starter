@@ -41,26 +41,14 @@ def ids(client):
     return {"customers": customers, "products": products}
 
 
-# The two fixtures below need Lab 1 (quotes) AND Lab 2 (policies) done. Use them in Lab 2 and Lab 3 tests.
+# Two policies are seeded on startup (app/seed.py) so claims can be tested before the premium calculator exists.
 @pytest.fixture
-def health_policy(client, ids):
-    """An active 1-year Health policy for Priya Nair (age ~36), sum insured 5,00,000."""
-    q = client.post(
-        "/api/quotes",
-        json={"customer_id": ids["customers"]["Priya Nair"], "product_id": ids["products"]["HEALTH"],
-              "sum_insured": 500000, "tenure_years": 1},
-    ).json()
-    return client.post("/api/policies", json={"quote_id": q["id"], "start_date": "2026-01-01"}).json()
+def health_policy(client):
+    """Seeded: Priya Nair · Health Shield · sum insured 5,00,000 · 1 year · 2026-01-01 -> 2026-12-31 · premium 15,000."""
+    return next(p for p in client.get("/api/policies").json() if p["policy_number"].startswith("PD-HEALTH-"))
 
 
 @pytest.fixture
-def motor_policy(client, ids):
-    q = client.post(
-        "/api/quotes",
-        json={"customer_id": ids["customers"]["Rohan Das"], "product_id": ids["products"]["MOTOR"],
-              "sum_insured": 800000, "tenure_years": 2, "add_ons": "ZERO_DEPRECIATION"},
-    ).json()
-    return client.post(
-        "/api/policies",
-        json={"quote_id": q["id"], "start_date": "2026-01-01", "vehicle_registration": "TS09AB1234"},
-    ).json()
+def motor_policy(client):
+    """Seeded: Rohan Das · Motor Secure · 8,00,000 · 2 years · 2026-03-01 -> 2028-02-28 · vehicle TS09AB1234."""
+    return next(p for p in client.get("/api/policies").json() if p["policy_number"].startswith("PD-MOTOR-"))

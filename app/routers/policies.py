@@ -1,4 +1,4 @@
-"""Policies API.   *** LAB 2: YOUR CODE HERE ***
+"""Policies API.
 
 POST  /api/policies              -> issue a policy from a quote
 PATCH /api/policies/{id}/status  -> Active / Lapsed / Cancelled

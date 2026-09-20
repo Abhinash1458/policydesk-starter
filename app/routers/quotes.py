@@ -1,4 +1,4 @@
-"""Quotes API.   *** LAB 1: YOUR CODE HERE ***
+"""Quotes API.
 
 POST /api/quotes  -> look up the customer and product, run the premium calculator, save the quote.
     404 if customer or product does not exist

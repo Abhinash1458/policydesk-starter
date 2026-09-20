@@ -50,8 +50,10 @@ def test_invalid_customer_email_is_rejected_with_422(client):
     assert client.post("/api/customers", json=payload).status_code == 422
 
 
-def test_policies_and_claims_lists_start_empty(client):
-    assert client.get("/api/policies").json() == []
+def test_two_policies_are_seeded_and_no_claims(client):
+    policies = client.get("/api/policies").json()
+    assert sorted(p["policy_number"] for p in policies) == ["PD-HEALTH-2026-00001", "PD-MOTOR-2026-00002"]
+    assert all(p["status"] == "Active" for p in policies)
     assert client.get("/api/claims").json() == []
 
 

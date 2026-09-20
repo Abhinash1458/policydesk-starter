@@ -15,7 +15,7 @@ def test_issue_policy_copies_quote_and_computes_period(client, health_policy):
 
 def test_two_year_motor_policy_ends_after_730_days(client, motor_policy):
     assert motor_policy["policy_number"].startswith("PD-MOTOR-2026-")
-    assert motor_policy["end_date"] == "2027-12-31"
+    assert motor_policy["end_date"] == "2028-02-28"   # 2026-03-01 + 730 days - 1 day
     assert motor_policy["vehicle_registration"] == "TS09AB1234"
 
 

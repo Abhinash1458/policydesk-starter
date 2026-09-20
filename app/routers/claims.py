@@ -1,4 +1,4 @@
-"""Claims API.   *** LAB 3: YOUR CODE HERE ***
+"""Claims API.
 
 POST  /api/claims               -> file a claim (201). Runs services.claims.validate_claim:
                                      ClaimValidationError with auto_reject  -> save the claim as Rejected, reason = message
@@ -47,10 +47,17 @@ def file_claim(payload: ClaimCreate, session: Session) -> Claim:
 
 
 @router.get("", response_model=list[ClaimRead])
-def list_claims(policy_id: int | None = None, session: Session = Depends(get_session)):
+def list_claims(
+    policy_id: int | None = None,
+    status: ClaimStatus | None = None,
+    session: Session = Depends(get_session),
+):
+    """List claims, newest first. `?status=Filed` is the admin's review queue."""
     stmt = select(Claim).order_by(Claim.created_at.desc())
     if policy_id:
         stmt = stmt.where(Claim.policy_id == policy_id)
+    if status:
+        stmt = stmt.where(Claim.status == status)
     return session.exec(stmt).all()
 
 

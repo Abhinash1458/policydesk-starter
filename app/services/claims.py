@@ -1,4 +1,4 @@
-"""Claim validation rules.   *** LAB 3: YOUR CODE HERE ***
+"""Claim validation rules.
 
 A claim is accepted for filing only if:
     1. The policy is Active.

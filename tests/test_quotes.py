@@ -56,7 +56,7 @@ def test_quotes_are_listed_newest_first(client, ids):
             "sum_insured": sum_insured, "tenure_years": 1,
         })
     listed = client.get("/api/quotes").json()
-    assert [q["sum_insured"] for q in listed] == [600000, 500000]
+    assert [q["sum_insured"] for q in listed][:2] == [600000, 500000]   # newest first, seeded quotes after
 
 
 def test_quote_form_submission_redirects_to_detail(client, ids):

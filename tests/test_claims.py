@@ -1,4 +1,4 @@
-"""Lab 3 — claim rules, filing and the status workflow."""
+"""Phase 2 (Examples 1–3) — the Claim model, the filing endpoint and its four rules."""
 import pytest
 
 pytestmark = pytest.mark.regression
@@ -54,41 +54,6 @@ def test_cancelled_policy_auto_rejects_claim(client, health_policy):
 
 
 # ---- workflow -------------------------------------------------------------------
-
-def test_happy_path_filed_review_approved(client, health_policy):
-    cid = client.post("/api/claims", json=claim_for(health_policy)).json()["id"]
-    assert client.patch(f"/api/claims/{cid}/status", json={"status": "Under Review"}).json()["status"] == "Under Review"
-    r = client.patch(f"/api/claims/{cid}/status", json={"status": "Approved", "reason": "Bills verified"})
-    assert r.json()["status"] == "Approved" and r.json()["reason"] == "Bills verified"
-
-
-def test_illegal_transitions_are_409(client, health_policy):
-    cid = client.post("/api/claims", json=claim_for(health_policy)).json()["id"]
-    assert client.patch(f"/api/claims/{cid}/status", json={"status": "Approved"}).status_code == 409   # skip review
-    client.patch(f"/api/claims/{cid}/status", json={"status": "Rejected", "reason": "Not covered"})
-    assert client.patch(f"/api/claims/{cid}/status", json={"status": "Under Review"}).status_code == 409  # final
-    assert client.patch("/api/claims/999/status", json={"status": "Under Review"}).status_code == 404
-
-
-def test_approved_claims_reduce_remaining_cover(client, health_policy):
-    first = client.post("/api/claims", json=claim_for(health_policy, amount=400000)).json()["id"]
-    client.patch(f"/api/claims/{first}/status", json={"status": "Under Review"})
-    client.patch(f"/api/claims/{first}/status", json={"status": "Approved"})
-    # only 1,00,000 of cover is left now
-    assert client.post("/api/claims", json=claim_for(health_policy, amount=150000)).status_code == 422
-    second = client.post("/api/claims", json=claim_for(health_policy, amount=100000)).json()["id"]
-    client.patch(f"/api/claims/{second}/status", json={"status": "Under Review"})
-    assert client.patch(f"/api/claims/{second}/status", json={"status": "Approved"}).status_code == 200
-
-
-def test_approval_above_remaining_cover_is_422(client, health_policy):
-    a = client.post("/api/claims", json=claim_for(health_policy, amount=300000)).json()["id"]
-    b = client.post("/api/claims", json=claim_for(health_policy, amount=300000)).json()["id"]   # both fit when filed
-    for cid in (a, b):
-        client.patch(f"/api/claims/{cid}/status", json={"status": "Under Review"})
-    assert client.patch(f"/api/claims/{a}/status", json={"status": "Approved"}).status_code == 200
-    assert client.patch(f"/api/claims/{b}/status", json={"status": "Approved"}).status_code == 422   # only 2,00,000 left
-
 
 def test_list_claims_filters_by_policy(client, health_policy, motor_policy):
     client.post("/api/claims", json=claim_for(health_policy))

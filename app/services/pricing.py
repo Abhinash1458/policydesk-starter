@@ -1,4 +1,4 @@
-"""Premium calculator — pure functions, no database.   *** LAB 1: YOUR CODE HERE ***
+"""Premium calculator — pure functions, no database.
 
     premium = sum_insured x base_rate x age_factor x tenure_factor x add_on_factor
     (never less than MIN_PREMIUM, rounded to 2 decimals)
@@ -21,7 +21,7 @@ Add-ons (each adds to the factor: 1.0 + 0.15 = 1.15)
 Sum insured
     must be > 0 and within the product's min/max (when given) -> PricingError otherwise
 
-Every function below is deliberately simple so it can be unit-tested (Lab 1, Part D).
+Every function below is deliberately simple so it can be unit-tested.
 Tip: ask Copilot to implement one function at a time from its docstring, then read every line.
 """
 from datetime import date

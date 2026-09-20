@@ -116,24 +116,8 @@ def products_page(request: Request, session: Session = Depends(get_session)):
 
 
 # --------------------------------------------------------------------------- #
-# Student scenarios — see docs/scenarios.md. Replace each placeholder with the real page.
+# Quotes
 # --------------------------------------------------------------------------- #
-SCENARIOS = {
-    1: ("Quotes list", "/quotes", "quotes.html",
-        "Every quote, Open vs Converted, filter by product, 'Issue policy' button for open quotes."),
-    2: ("Customer 360", "/customers/{id}", "customer_detail.html",
-        "Profile, totals, and every quote / policy / claim for one customer. 'New quote' button pre-selects them."),
-    3: ("Claim review", "/claims/{id}", "claim_detail.html",
-        "Claim + policy context, remaining cover, and only the allowed next actions with a reason box."),
-}
-
-
-def scenario_placeholder(request: Request, number: int):
-    title, route, template, summary = SCENARIOS[number]
-    return render(request, "scenario_todo.html", number=number, title=title, route=route,
-                  template=template, summary=summary)
-
-
 @router.get("/quotes", response_class=HTMLResponse)
 def quotes_list(
     request: Request,
