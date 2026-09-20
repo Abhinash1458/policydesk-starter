@@ -60,7 +60,7 @@ The pipeline ignores tests marked `lab` (your unfinished targets) — so it stay
 git checkout -b team-<name>-claims
 git push -u origin team-<name>-claims
 ```
-Then on GitHub: your fork → **Contribute → Open pull request** → base repository `Abhinash1458/policydesk-starter`, **base branch `workshop`** (not `main`), compare `team-<name>-claims`. The PR runs the pipeline; when the instructor merges it, the upstream `workshop` branch deploys to Vercel. Full steps: `docs/day2-deployment.md`.
+Then on GitHub: your fork → **Contribute → Open pull request** → base repository `Abhinash1458/policydesk-starter`, base branch `main`, compare `team-<name>-claims`. The PR runs the pipeline; when the instructor merges it, upstream `main` deploys to Vercel. Full steps: `docs/day2-deployment.md`.
 
 ## 6 · If the original repo changes during the day (instructor says "pull the fix")
 
@@ -78,7 +78,7 @@ git merge upstream/main                   # resolve conflicts if any, then commi
 | throw away all uncommitted changes | `git stash` (recoverable with `git stash pop`) |
 | see what a commit changed | `git show --stat HEAD` |
 | go back one commit but keep the changes | `git reset --soft HEAD~1` |
-| see the solution for comparison (after the session) | `git fetch upstream && git checkout upstream/solution -- app/routers/claims.py` |
+| see the solution for comparison (after the session) | `git fetch upstream --tags && git checkout v2-solution -- app/routers/claims.py` |
 
 ## Common mistakes
 

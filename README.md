@@ -88,7 +88,7 @@ Product  --+
 
 Every push to your fork runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml): **smoke (2) → regression (10)**. Tests marked `lab` are excluded, so the pipeline stays green while you work and only turns red if you break something that already worked. Enable Actions on your fork first (Settings → Actions → *Allow all actions*).
 
-Deploy stages run only on the upstream repo (`main`, `solution`, `workshop`) where the secrets live — they show as *skipped* on a fork. On Day 2 one team's PR into upstream `workshop` is merged and deploys to Vercel: https://policydesk-jet.vercel.app
+Deploy stages run only on the upstream repo (`main`) where the secrets live — they show as *skipped* on a fork. On Day 2 one team's PR into upstream `main` is merged and deploys to Vercel: https://policydesk-jet.vercel.app
 
 ## Project layout
 

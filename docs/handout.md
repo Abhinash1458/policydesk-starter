@@ -11,7 +11,7 @@
 | 1 · Phase 3 Your prompt | 25 | admin approval workflow, prompt written by you | `pytest tests/test_claims_admin.py` = 6 passed, pushed |
 | 2 · Lab 1 Quotation | 45 | four premium functions in `pricing.py` | pricing + quotes tests green, ₹15,000.00 on screen |
 | 2 · Lab 2 Issue policy | 45 | `issue_policy` + `update_policy_status` | `pytest` = 80 passed |
-| 2 · Deployment | 30 | branch → push → PR to upstream `workshop` → merge → Vercel | live `/health` |
+| 2 · Deployment | 30 | branch → push → PR to upstream `main` → merge → Vercel | live `/health` |
 
 ## Commands
 

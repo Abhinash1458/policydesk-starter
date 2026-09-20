@@ -115,6 +115,6 @@ Same loop as Day 1 — prompt → read → test → commit — but now the rules
 |---|---|---|---|
 | **Lab 1 · Quotation calculator** | 45 | `age_factor`, `tenure_factor`, `add_on_factor`, `calculate_premium` in `app/services/pricing.py` | `pytest tests/test_pricing.py tests/test_quotes.py tests/test_pages.py` green · *Get a quote* → ₹15,000.00 |
 | **Lab 2 · Issue a policy** | 45 | `issue_policy` and `update_policy_status` in `app/routers/policies.py` | `pytest` → **80 passed** · issue → 31 Dec end date → re-issue 409 → cancel → 409 |
-| **Deployment pipeline** | 30 | branch → push → one team's PR to upstream `workshop` → merge → Vercel deploy | live `/health` on the projector |
+| **Deployment pipeline** | 30 | branch → push → one team's PR to upstream `main` → merge → Vercel deploy | live `/health` on the projector |
 
-Behind on Day 1? `git fetch upstream && git checkout upstream/solution -- app/routers/claims.py app/templates/claims.html` gives you the claims feature so Day 2 can start.
+Behind on Day 1? `git fetch upstream --tags && git checkout v2-solution -- app/routers/claims.py app/templates/claims.html` gives you the claims feature so Day 2 can start.

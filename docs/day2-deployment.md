@@ -5,9 +5,9 @@
 ```
 your fork                          upstream: Abhinash1458/policydesk-starter                    Vercel
 ────────────────                   ──────────────────────────────────────────                  ──────────────────
-git push -u origin <branch>  ──►   Pull request → branch `workshop`  ──►  CI on the PR:          
+git push -u origin <branch>  ──►   Pull request → branch `main`     ──►  CI on the PR:          
                                    smoke (2) → regression (10) ✓                                
-                                   instructor clicks Merge  ──►  push to `workshop`  ──►  CI again  ──►  deploy-vercel  ──►  live URL /health
+                                   instructor clicks Merge  ──►  push to `main`      ──►  CI again  ──►  deploy-vercel  ──►  live URL /health
 ```
 
 **Every team** does steps 1–2. **One team** (chosen by the instructor) does step 3 on the projector. Everyone watches step 4.
@@ -35,7 +35,7 @@ On your fork's page: **Contribute → Open pull request** (or *Compare & pull re
 | Field | Value |
 |---|---|
 | base repository | `Abhinash1458/policydesk-starter` |
-| **base branch** | **`workshop`** ← not `main` (main is the starter every other student clones) |
+| **base branch** | **`main`** |
 | head repository | `<your-username>/policydesk-starter` |
 | compare | `team-<name>-claims` |
 | title | `Team <name>: claims feature + admin approval` |
@@ -46,7 +46,7 @@ On your fork's page: **Contribute → Open pull request** (or *Compare & pull re
 ## 4 · Merge → deploy (10 min, instructor drives, everyone watches)
 
 1. Instructor: **Merge pull request → Confirm merge**.
-2. Upstream → **Actions**: a new run on `workshop` — smoke ✓ → regression ✓ → **Deploy to Vercel** runs (this job only runs on the upstream repo, where the Vercel secrets live — it's *skipped* on forks).
+2. Upstream → **Actions**: a new run on `main` — smoke ✓ → regression ✓ → **Deploy to Vercel** runs (this job only runs on the upstream repo, where the Vercel secrets live — it's *skipped* on forks).
 3. Open the *Deploy to Vercel* job: `vercel pull` → `vercel build` → `vercel deploy --prebuilt --prod` → `curl /health`.
 4. Open the live URL → **https://policydesk-jet.vercel.app/health** → `{"status":"ok"}` → the dashboard → *Claims* in the nav — the team's code, live.
 
@@ -63,13 +63,12 @@ That's the pipeline: **tests gate the merge, the merge triggers the deploy.** No
 ```
 git checkout -b team-<name>-claims       # branch
 git push -u origin team-<name>-claims    # push (runs CI on your fork)
-# then on GitHub: Contribute → Open pull request → base: Abhinash1458/policydesk-starter  branch: workshop
+# then on GitHub: Contribute → Open pull request → base: Abhinash1458/policydesk-starter  branch: main
 ```
 
 | Problem | Fix |
 |---|---|
-| "Compare & pull request" offers base `main` | change the base branch dropdown to **`workshop`** |
 | PR checks red | fix on your branch, `git push` — the PR updates itself |
-| "This branch has conflicts" | `git fetch upstream && git merge upstream/workshop`, resolve, push |
+| "This branch has conflicts" | `git fetch upstream && git merge upstream/main`, resolve, push |
 | Deploy job *skipped* on my fork | expected — secrets are upstream only |
 | Live site shows old data / no claims | Vercel cold start reset `/tmp` — file a claim again from `/docs` |
