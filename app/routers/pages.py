@@ -12,6 +12,10 @@ from sqlmodel import Session, func, select
 
 from app.db import get_session
 from app.models import (
+    Claim,
+    ClaimCreate,
+    ClaimStatus,
+    ClaimStatusUpdate,
     Customer,
     CustomerCreate,
     Policy,
@@ -22,6 +26,7 @@ from app.models import (
     QuoteCreate,
 )
 from app.routers.policies import issue_policy
+from app.routers.claims import file_claim
 from app.routers.quotes import price_quote
 from app.services import pricing
 
@@ -49,6 +54,7 @@ def money(value: float | None) -> str:
 templates.env.filters["money"] = money
 templates.env.globals["today"] = date.today
 templates.env.globals["PolicyStatus"] = PolicyStatus
+templates.env.globals["ClaimStatus"] = ClaimStatus
 
 
 def render(request: Request, name: str, **ctx):
@@ -241,6 +247,80 @@ def policies_list(request: Request, status: str | None = None, session: Session 
         stmt = stmt.where(Policy.status == status)
     return render(request, "policies.html", policies=session.exec(stmt).all(), status=status)
 
+@router.get("/claims", response_class=HTMLResponse)
+def claims_list(
+    request: Request,
+    status: str | None = None,
+    session: Session = Depends(get_session),
+):
+    stmt = select(Claim).order_by(Claim.created_at.desc())
+
+    if status:
+        stmt = stmt.where(Claim.status == status)
+
+    return render(
+        request,
+        "claims.html",
+        claims=session.exec(stmt).all(),
+        status=status,
+    )
+
+@router.post("/policies/{policy_id}/claims")
+def claim_submit(
+    policy_id: int,
+    amount: float = Form(...),
+    description: str = Form(...),
+    incident_date: date = Form(...),
+    vehicle_registration: str = Form(""),
+    session: Session = Depends(get_session),
+):
+    try:
+        payload = ClaimCreate(
+            policy_id=policy_id,
+            amount=amount,
+            description=description,
+            incident_date=incident_date,
+            vehicle_registration=vehicle_registration or None,
+        )
+
+        claim = file_claim(payload, session)
+
+    except HTTPException as exc:
+        return RedirectResponse(
+            f"/policies/{policy_id}?error={exc.detail}",
+            status_code=303,
+        )
+
+    return RedirectResponse(
+        f"/claims?flash=Claim+{claim.id}+filed",
+        status_code=303,
+    )
+
+@router.post("/claims/{claim_id}/status")
+def claim_status_submit(
+    claim_id: int,
+    status: ClaimStatus = Form(...),
+    reason: str = Form(""),
+    session: Session = Depends(get_session),
+):
+    from app.routers.claims import update_claim_status
+
+    try:
+        payload = ClaimStatusUpdate(
+            status=status,
+            reason=reason or None,
+        )
+        claim = update_claim_status(claim_id, payload, session)
+    except HTTPException as exc:
+        return RedirectResponse(
+            f"/claims?error={exc.detail}",
+            status_code=303,
+        )
+
+    return RedirectResponse(
+        f"/claims?flash=Claim+{claim.id}+updated",
+        status_code=303,
+    )
 
 @router.get("/policies/{policy_id}", response_class=HTMLResponse)
 def policy_detail(request: Request, policy_id: int, session: Session = Depends(get_session)):
