@@ -1,8 +1,15 @@
-fastapi>=0.115
-uvicorn[standard]>=0.30
-sqlmodel>=0.0.22
-jinja2>=3.1
-python-multipart>=0.0.9
-email-validator>=2.0
-pytest>=8.0
-httpx>=0.27
+# Pinned on purpose: every machine in the room must resolve to the same versions.
+# Loose ranges break the room — sqlmodel 0.0.43+ rejects the naive datetime defaults
+# in app/models.py, so a fresh install would fail before the first lesson.
+# Verified together on Python 3.12 and 3.14 (Windows, macOS, Linux, CI).
+fastapi==0.141.1
+starlette==1.6.0
+uvicorn[standard]==0.53.0
+sqlmodel==0.0.42
+sqlalchemy==2.0.54
+pydantic==2.13.5
+jinja2==3.1.6
+python-multipart==0.0.32
+email-validator==2.3.0
+pytest==9.1.1
+httpx==0.28.1

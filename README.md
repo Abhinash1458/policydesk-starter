@@ -23,6 +23,24 @@ Keep [docs/handout.md](docs/handout.md) open — commands, the prompt pattern, w
 
 ```bash
 git clone https://github.com/<your-username>/policydesk-starter.git
+```
+
+### Windows — one click
+
+Open the cloned `policydesk-starter` folder and **double-click `setup.bat`**. It:
+
+1. checks **Python 3.12+** — installs it if missing
+2. checks **Git** — installs it if missing (you need it to push)
+3. checks **VS Code** — installs it if missing
+4. creates and activates **`.venv`**
+5. runs **`pip install -r requirements.txt`**
+
+…then starts PolicyDesk and opens http://127.0.0.1:8000. No admin rights needed; safe to run again.
+If Windows shows *"Windows protected your PC"*, click **More info → Run anyway**.
+
+### By hand (macOS / Linux, or if `setup.bat` reports a problem)
+
+```bash
 cd policydesk-starter
 python -m venv .venv
 .venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate

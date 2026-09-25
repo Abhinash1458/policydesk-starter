@@ -12,6 +12,12 @@ Do all of this **before the workshop**. It takes about 60–90 minutes on a norm
 | **Cost** | Everything in this guide is free — no credit card is needed anywhere |
 | **Help** | info@talentpathacademy.com · +91 87900 02007 |
 
+> **Windows shortcut — one click.** Fork the repo, clone your fork, then double-click **`setup.bat`** in the cloned folder.
+> It installs Python 3.12, Git and VS Code if they are missing, creates and activates `.venv`, installs `requirements.txt`
+> and starts PolicyDesk at http://127.0.0.1:8000. No admin rights needed; run it again any time.
+> You still need your own GitHub account (section 5) and Copilot sign-in (section 6) — the script does not do those.
+> On macOS / Linux, or if `setup.bat` ends with **FAILED**, follow the manual steps below.
+
 ---
 
 ## 1. What you need and why

@@ -68,6 +68,9 @@ Seeded data: customers **Priya Nair** (id 1, Health policy `PD-HEALTH-2026-00001
 
 | Symptom | Fix |
 |---|---|
+| Setup on a new machine | double-click **`setup.bat`** in the cloned folder — installs what is missing, builds `.venv`, starts the app |
+| `setup.bat`: *"Windows protected your PC"* | **More info → Run anyway** |
+| `setup.bat` ends with **FAILED** (pip) | Wi-Fi or college proxy blocking pypi.org — switch network, run `setup.bat` again |
 | `ModuleNotFoundError: fastapi` | venv not active — look for `(.venv)` in the prompt; activate; `pip install -r requirements.txt` |
 | `'python' is not recognized` / opens Microsoft Store | reinstall Python with *Add to PATH* ticked, or use `py -3.12`; Settings → App execution aliases → turn off `python` |
 | `Activate.ps1 cannot be loaded` | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, or use `.venv\Scripts\activate.bat` |
