@@ -59,20 +59,20 @@ def parse_add_ons(raw: str | None) -> list[str]:
 
 def age_factor(age: int, product: ProductCode) -> float:
     """Return the multiplier for this age band and product. See the rules at the top of the file."""
-    # TODO (Day 2, Lab 1): four age bands; Motor and non-Motor differ only under 25; negative age -> PricingError
-    raise NotImplementedError("Day 2, Lab 1: implement age_factor")
+    # TODO (Lab 1): four age bands; Motor and non-Motor differ only under 25; negative age -> PricingError
+    raise NotImplementedError("Lab 1: implement age_factor")
 
 
 def tenure_factor(tenure_years: int) -> float:
     """Return the tenure discount multiplier, or raise PricingError for an unsupported tenure."""
-    # TODO (Day 2, Lab 1): look the tenure up in TENURE_FACTORS; anything else -> PricingError
-    raise NotImplementedError("Day 2, Lab 1: implement tenure_factor")
+    # TODO (Lab 1): look the tenure up in TENURE_FACTORS; anything else -> PricingError
+    raise NotImplementedError("Lab 1: implement tenure_factor")
 
 
 def add_on_factor(product: ProductCode, add_ons: list[str]) -> float:
     """1.0 plus the sum of every valid add-on loading for this product. Blank entries are ignored."""
-    # TODO (Day 2, Lab 1): 1.0 + each valid loading from ADD_ONS[product]; blanks ignored; unknown add-on -> PricingError
-    raise NotImplementedError("Day 2, Lab 1: implement add_on_factor")
+    # TODO (Lab 1): 1.0 + each valid loading from ADD_ONS[product]; blanks ignored; unknown add-on -> PricingError
+    raise NotImplementedError("Lab 1: implement add_on_factor")
 
 
 def calculate_premium(
@@ -87,5 +87,5 @@ def calculate_premium(
     max_sum_insured: float | None = None,
 ) -> float:
     """Return the annual premium in rupees, rounded to 2 decimals and never below MIN_PREMIUM."""
-    # TODO (Day 2, Lab 1): validate sum_insured, multiply the factors, apply MIN_PREMIUM, round to 2 dp
-    raise NotImplementedError("Day 2, Lab 1: implement calculate_premium")
+    # TODO (Lab 1): validate sum_insured, multiply the factors, apply MIN_PREMIUM, round to 2 dp
+    raise NotImplementedError("Lab 1: implement calculate_premium")

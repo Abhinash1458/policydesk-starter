@@ -1,4 +1,4 @@
-"""HTML screen tests that create new quotes — they pass once the premium calculator (Day 2, Lab 1) is done."""
+"""HTML screen tests that create new quotes — they pass once the premium calculator (Lab 1) is done."""
 import pytest
 
 pytestmark = pytest.mark.lab

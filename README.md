@@ -1,19 +1,20 @@
 # PolicyDesk — starter
 
-A small, real insurance app — **customers → products → quotes → policies** — that you extend with AI over two days:
-the **claims** feature from four worked prompts, an **admin approval** workflow from a prompt you write yourself, then the
-**quotation calculator** and **issue-policy** rules, shipped through a **CI → Vercel** pipeline.
+A small, real insurance app — **customers → products → quotes → policies** — with the important parts missing.
+In four labs you **build them yourself with AI prompts**: the **premium calculator**, **policy issuing**, the **claim form**
+and the **claim approval** screen — then ship it through a **CI → Vercel** pipeline and finish a renewal feature at home.
 
 *TalentPath Academy · AI-Powered SDLC Workshop* — start with [docs/workshop-guide.md](docs/workshop-guide.md)
 
-| Day | Session | Min | You do | Guide |
+| # | Session | Min | You build with prompts | Guide |
 |---|---|---|---|---|
-| 1 | Phase 1 · Fork & explore | 25 | fork this repo, run it, read the code with Copilot | [workshop-guide](docs/workshop-guide.md) · [git-workflow](docs/git-workflow.md) |
-| 1 | Phase 2 · Four prompts, real outputs | 30 | Claim model → claim endpoints → database tables → Claims page | [phase2-prompts](docs/phase2-prompts.md) |
-| 1 | Phase 3 · Your own prompt | 25 | admin approval: review queue + Approve / Reject with reason | [phase3-admin-approval](docs/phase3-admin-approval.md) |
-| 2 | Lab 1 · Quotation calculator | 45 | the four premium functions | [day2-lab1-quotation](docs/day2-lab1-quotation.md) |
-| 2 | Lab 2 · Issue a policy | 45 | `issue_policy` + status change | [day2-lab2-issue-policy](docs/day2-lab2-issue-policy.md) |
-| 2 | Deployment pipeline | 30 | branch → PR → merge → Vercel deploys | [day2-deployment](docs/day2-deployment.md) |
+| 0 | Setup & explore | 30 | fork, `setup.bat`, read the code with Copilot | [workshop-guide](docs/workshop-guide.md) · [git-workflow](docs/git-workflow.md) |
+| 1 | **Lab 1 · Premium calculator** | 45 | the four premium functions | [lab1-premium-calculator](docs/lab1-premium-calculator.md) |
+| 2 | **Lab 2 · Issue a policy** | 45 | `issue_policy` + status change | [lab2-issue-policy](docs/lab2-issue-policy.md) |
+| 3 | **Lab 3 · Claim form** | 50 | Claim model → claims API → Claims page → *File a claim* form | [lab3-claim-form](docs/lab3-claim-form.md) |
+| 4 | **Lab 4 · Approve / reject** | 45 | review workflow (your own prompt) + Approve / Reject buttons on the Claims page | [lab4-claim-approval](docs/lab4-claim-approval.md) |
+| — | Deployment pipeline | 30 | branch → PR → merge → Vercel deploys | [deployment](docs/deployment.md) |
+| 5 | **Assignment** (take-home) | 60–90 | renewal quote with a 10% no-claim bonus | [assignment-renewal](docs/assignment-renewal.md) |
 
 Keep [docs/handout.md](docs/handout.md) open — commands, the prompt pattern, where things are, troubleshooting.
 
@@ -53,23 +54,23 @@ uvicorn app.main:app --reload
 - On first start the app creates `policydesk.db` and seeds 3 products, 2 customers and 2 policies. Delete the file to reset.
 
 ```bash
-pytest -m "not lab"     # 15 tests — what CI runs; must stay green
-pytest -m lab           # your targets — fail on the starter by design
-pytest                  # everything — 80 green at the end of Day 2
+pytest -m "not lab"               # 15 tests — what CI runs; must stay green
+pytest tests/test_lab3_claims.py  # one lab's acceptance tests (red until you build it)
+pytest -m "not assignment"        # everything — all green after Lab 4
+pytest -m assignment              # the take-home assignment
 ```
 
 ## What's given, what you build
 
 | | Given | You build |
 |---|---|---|
-| Models | Customer, Product, Quote, Policy | **Claim** (Phase 2, Ex. 1) |
-| API | customers, products, quotes, policies | **`/api/claims`** — file, list, get (Ex. 2) · **`PATCH …/status`** (Phase 3) |
-| Database | SQLite, auto-created, seeded | **`app/init_db.py`** + register the router (Ex. 3) |
-| Rules | claim rules in your prompt; policy rules in the `policies.py` docstring | **premium calculator** `pricing.py` (Day 2 Lab 1) · **`issue_policy` + status** (Day 2 Lab 2) |
-| Screens | dashboard, customers, customer 360, products, quotes, quote detail, policies, policy detail | **Claims page** (Phase 2, Ex. 4) |
-| Tests | smoke + regression (given features) | lab-marked tests are your acceptance criteria |
+| Models | Customer, Product, Quote, Policy | **Claim** (Lab 3) |
+| API | customers, products, quotes, policies (read) | **`POST /api/policies`** + status (Lab 2) · **`/api/claims`** (Lab 3) · **`PATCH /api/claims/{id}/status`** (Lab 4) · **renewal quote** (assignment) |
+| Rules | premium rules in the `pricing.py` docstring; policy rules in the `policies.py` docstring | **premium calculator** (Lab 1) · **`issue_policy`** (Lab 2) · claim rules (Lab 3) · approval workflow (Lab 4) |
+| Screens | dashboard, customers, customer 360, products, quotes, quote detail, policies, policy detail | **Claims page** + **File a claim** form (Lab 3) · **Approve / Reject** buttons (Lab 4) |
+| Tests | smoke + regression (given features) | `tests/test_lab1_*` … `test_lab4_*` and `test_assignment_*` are your acceptance criteria |
 
-Search the code for `Phase 2`, `Phase 3`, `Day 2, Lab 1` and `Day 2, Lab 2` to find every spot.
+Search the code for `Lab 1`, `Lab 2` and `Lab 3` to find every spot you will change.
 
 ## The domain
 
@@ -96,31 +97,32 @@ Product  --+
 |---|---|---|
 | GET / POST | `/api/customers` | ✓ |
 | GET | `/api/products` | ✓ |
-| GET / POST | `/api/quotes` | ✓ (POST needs the premium calculator — Day 2 Lab 1) |
-| GET / POST | `/api/policies` · PATCH `/api/policies/{id}/status` | GET ✓ · POST + PATCH: Day 2 Lab 2 |
-| GET / POST | `/api/claims` · GET `/api/claims/{id}` · `?status=` `?policy_id=` | Ex. 2–3 |
-| PATCH | `/api/claims/{id}/status` | Phase 3 |
+| GET / POST | `/api/quotes` | ✓ (POST needs the premium calculator — Lab 1) |
+| GET / POST | `/api/policies` · PATCH `/api/policies/{id}/status` | GET ✓ · POST + PATCH: Lab 2 |
+| GET / POST | `/api/claims` · GET `/api/claims/{id}` · `?status=` `?policy_id=` | Lab 3 |
+| PATCH | `/api/claims/{id}/status` | Lab 4 |
+| POST | `/api/policies/{id}/renewal-quote` | Assignment |
 | GET | `/health` | ✓ |
 
 ## CI/CD — GitHub Actions
 
 Every push to your fork runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml): **smoke (2) → regression (10)**. Tests marked `lab` are excluded, so the pipeline stays green while you work and only turns red if you break something that already worked. Enable Actions on your fork first (Settings → Actions → *Allow all actions*).
 
-Deploy stages run only on the upstream repo (`main`) where the secrets live — they show as *skipped* on a fork. On Day 2 one team's PR into upstream `main` is merged and deploys to Vercel: https://policydesk-jet.vercel.app
+Deploy stages run only on the upstream repo (`main`) where the secrets live — they show as *skipped* on a fork. In the deployment session one team's PR into upstream `main` is merged and deploys to Vercel: https://policydesk-jet.vercel.app
 
 ## Project layout
 
 ```
 app/
-  main.py              FastAPI app, routers, startup seed         (Ex. 3: register claims)
+  main.py              FastAPI app, routers, startup seed         (Lab 3: register claims)
   db.py                engine + session (DATABASE_URL)
-  models.py            SQLModel tables + schemas                  (Ex. 1: add Claim)
+  models.py            SQLModel tables + schemas                  (Lab 3: add Claim)
   seed.py              products, customers, 2 policies
-  services/pricing.py  premium rules                              (Day 2 Lab 1)
-  routers/             customers · products · quotes · policies (Day 2 Lab 2) · pages (HTML)   (Ex. 2: + claims.py · Ex. 4: /claims page)
+  services/pricing.py  premium rules                              (Lab 1)
+  routers/             customers · products · quotes · policies (Lab 2) · pages (HTML)   (Lab 3: + claims.py, Claims page, form · Lab 4: buttons)
   templates/, static/  Jinja2 screens, TalentPath theme
-tests/                 smoke · regression · lab-marked targets (pricing, quotes, policies, pages, claims, claims_admin)
-docs/                  workshop-guide · phase2-prompts · phase3-admin-approval · day2-lab1-quotation · day2-lab2-issue-policy · day2-deployment · git-workflow · handout · setup-guide · dbeaver-demo
+tests/                 smoke · regression · test_lab1_* · test_lab2_* · test_lab3_* · test_lab4_* · test_assignment_*
+docs/                  workshop-guide · lab1…lab4 guides · assignment-renewal · deployment · git-workflow · handout · setup-guide · dbeaver-demo
 data/                  seed CSVs
 ```
 

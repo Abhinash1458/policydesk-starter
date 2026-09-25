@@ -1,4 +1,4 @@
-"""Day 2, Lab 1 — premium calculator. These fail on the starter and pass once pricing.py is implemented.
+"""Lab 1 — premium calculator. These fail on the starter and pass once pricing.py is implemented.
 
 Every age band and its boundaries (24/25, 45/46, 60/61), each tenure, add-ons, the minimum premium,
 invalid input, and a worked example calculated by hand.

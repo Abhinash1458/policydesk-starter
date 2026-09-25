@@ -13,6 +13,7 @@ markers = [
     "smoke: fast liveness checks — run first in CI, a failure stops the pipeline",
     "regression: protects the given features — runs after smoke on every push and PR",
     "lab: student targets that fail on the starter by design — excluded from CI until the lab is done",
+    "assignment: the take-home renewal assignment (also marked lab, so CI skips it) — run: pytest -m assignment",
 ]
 
 [tool.ruff]

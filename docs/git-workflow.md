@@ -27,21 +27,24 @@ The rhythm for the whole session: **change → test → commit**. Never commit r
 pytest -m "not lab"                       # must be green
 git status                                # see what changed
 git add -A
-git commit -m "Phase 2.1: Claim model"    # short, says what, not how
+git commit -m "Lab 3.1: Claim model"      # short, says what, not how
 ```
 
 The commits you should have by the end:
 
 | After | Message |
 |---|---|
-| Phase 1 | `Phase 1: setup and explore` |
-| Example 1 | `Phase 2.1: Claim model` |
-| Example 2 | `Phase 2.2: claim endpoints` |
-| Example 3 | `Phase 2.3: register claims router, init_db` |
-| Example 4 | `Phase 2.4: premium calculation` |
-| Phase 3 | `Phase 3: admin approval workflow` |
-| Day 2 Lab 1 | `Day 2 Lab 1: quotation calculator` |
-| Day 2 Lab 2 | `Day 2 Lab 2: issue policy and status` |
+| Setup | `Setup and explore` |
+| Lab 1 | `Lab 1: premium calculator` |
+| Lab 2 | `Lab 2: issue policy and status` |
+| Lab 3, Step 1 | `Lab 3.1: Claim model` |
+| Lab 3, Step 2 | `Lab 3.2: claim endpoints` |
+| Lab 3, Step 3 | `Lab 3.3: register claims router, init_db` |
+| Lab 3, Step 4 | `Lab 3.4: claims page` |
+| Lab 3, Step 5 | `Lab 3.5: File a claim form` |
+| Lab 4, Part A | `Lab 4A: claim review workflow` |
+| Lab 4, Part B | `Lab 4B: Approve / Reject on the Claims page` |
+| Assignment | `Assignment: renewal quote with no-claim bonus` |
 
 `git log --oneline` should read like a story of the session.
 
@@ -54,13 +57,13 @@ Then open **your fork → Actions**. The pipeline runs **smoke (2) → regressio
 
 The pipeline ignores tests marked `lab` (your unfinished targets) — so it stays green while you work, and only your regressions turn it red.
 
-## 5 · Day 2: branch → pull request (the deployment session)
+## 5 · Branch → pull request (the deployment session)
 
 ```
 git checkout -b team-<name>-claims
 git push -u origin team-<name>-claims
 ```
-Then on GitHub: your fork → **Contribute → Open pull request** → base repository `Abhinash1458/policydesk-starter`, base branch `main`, compare `team-<name>-claims`. The PR runs the pipeline; when the instructor merges it, upstream `main` deploys to Vercel. Full steps: `docs/day2-deployment.md`.
+Then on GitHub: your fork → **Contribute → Open pull request** → base repository `Abhinash1458/policydesk-starter`, base branch `main`, compare `team-<name>-claims`. The PR runs the pipeline; when the instructor merges it, upstream `main` deploys to Vercel. Full steps: `docs/deployment.md`.
 
 ## 6 · If the original repo changes during the day (instructor says "pull the fix")
 
@@ -78,7 +81,7 @@ git merge upstream/main                   # resolve conflicts if any, then commi
 | throw away all uncommitted changes | `git stash` (recoverable with `git stash pop`) |
 | see what a commit changed | `git show --stat HEAD` |
 | go back one commit but keep the changes | `git reset --soft HEAD~1` |
-| see the solution for comparison (after the session) | `git fetch upstream --tags && git checkout v2-solution -- app/routers/claims.py` |
+| compare with the expected code | every step's **Output** block is in its lab guide (`docs/lab*.md`) |
 
 ## Common mistakes
 

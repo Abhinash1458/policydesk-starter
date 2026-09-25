@@ -42,10 +42,10 @@ def next_policy_number(session: Session, product_code: ProductCode, start: date)
 
 def issue_policy(payload: PolicyCreate, session: Session) -> Policy:
     """Shared by the API and the HTML form. Raise HTTPException with the right status code on failure."""
-    # TODO (Day 2, Lab 2): follow "Rules for issuing" in the module docstring.
+    # TODO (Lab 2): follow "Rules for issuing" in the module docstring.
     #   Hints: `quote.policy` is None until a policy exists · `quote.product.code` tells you if it is MOTOR ·
     #          end_date = start_date + timedelta(days=365 * tenure) - timedelta(days=1) · next_policy_number() is given.
-    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "Day 2, Lab 2: implement issue_policy in app/routers/policies.py")
+    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "Lab 2: implement issue_policy in app/routers/policies.py")
 
 
 @router.get("", response_model=list[PolicyRead])
@@ -71,5 +71,5 @@ def get_policy(policy_id: int, session: Session = Depends(get_session)):
 
 @router.patch("/{policy_id}/status", response_model=PolicyRead)
 def update_policy_status(policy_id: int, payload: PolicyStatusUpdate, session: Session = Depends(get_session)):
-    # TODO (Day 2, Lab 2): 404 if missing · 409 if already Cancelled (cancelled is final) · else set status, commit, refresh, return.
-    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "Day 2, Lab 2: implement update_policy_status")
+    # TODO (Lab 2): 404 if missing · 409 if already Cancelled (cancelled is final) · else set status, commit, refresh, return.
+    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "Lab 2: implement update_policy_status")

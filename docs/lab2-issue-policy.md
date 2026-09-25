@@ -1,6 +1,6 @@
-# Day 2 · Lab 2 — Issue a policy
+# Lab 2 — Issue a policy
 
-*45 minutes · `app/routers/policies.py` · tests: `tests/test_policies.py`*
+*45 minutes · `app/routers/policies.py` · tests: `tests/test_lab2_policies.py`*
 
 ## The problem statement
 
@@ -17,7 +17,7 @@
 >
 > **Acceptance:** `POST /api/policies {quote_id, start_date}` → 201 with `policy_number`, `end_date`, `status: Active`; 404 unknown quote; 409 already issued; 422 Motor without vehicle. `PATCH /api/policies/{id}/status` → 200, or 409 once Cancelled. The quote page's *Issue policy* button works.
 
-The rules are in the docstring of `policies.py` — attach it. Until done, *Issue policy* on a quote page answers **501 "Day 2, Lab 2: implement issue_policy"**.
+The rules are in the docstring of `policies.py` — attach it. Until done, *Issue policy* on a quote page answers **501 "Lab 2: implement issue_policy"**.
 
 **Needs Lab 1:** creating a *new* quote to issue needs the calculator. If Lab 1 isn't done, use the two seeded quotes' policies for the status part and skip the issue part for now.
 
@@ -99,15 +99,15 @@ def update_policy_status(policy_id: int, payload: PolicyStatusUpdate, session: S
 
 ## Part C — tests, review, commit (20 min)
 
-1. `pytest tests/test_policies.py -v` — read each name; the 2-year case is the one that catches the −1 day.
+1. `pytest tests/test_lab2_policies.py -v` — read each name; the 2-year case is the one that catches the −1 day.
 2. Add one test of your own: a **3-year** policy from 2026-06-15 must end **2029-06-13** (3 × 365 = 1095 days, minus 1). Ask the AI to write it; check its expected date by hand first.
 3. Review — 📎 `#file:app/routers/policies.py`
    ```
    Report only real problems: 1. any date arithmetic not based on timedelta, or missing the -1 day? 2. is "cancelled is final" checked with the enum?
    3. is anything copied from the request that must come from the quote? 4. right status codes: 404 / 409 / 422 / 201?
    ```
-4. `git add -A && git commit -m "Day 2 Lab 2: issue policy and status" && git push` → Actions green.
+4. `git add -A && git commit -m "Lab 2: issue policy and status" && git push` → Actions green.
 
-**Done when:** `pytest` (everything) → **80 passed** · issue → correct period → re-issue 409 → cancel → change 409 · pushed.
+**Done when:** `pytest tests/test_lab2_policies.py` → **8 passed** and `pytest -m "not lab"` still green · issue → correct period → re-issue 409 → cancel → change 409 · pushed.
 
 **The prediction:** the rule the AI most often breaks is the **end date** (−1 day / `dateutil`); second, **cancelled is final**. Did you guess right?

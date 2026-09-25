@@ -1,6 +1,6 @@
 """SQLModel tables and API schemas for PolicyDesk.
 
-Four tables so far: Customer, Product, Quote, Policy.  (You add Claim in Phase 2.)
+Four tables so far: Customer, Product, Quote, Policy.  (You add Claim in Lab 3.)
 Flow: Customer + Product -> Quote -> Policy -> Claim
 """
 from datetime import date, datetime

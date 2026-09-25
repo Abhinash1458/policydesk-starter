@@ -1,4 +1,4 @@
-"""Day 2, Lab 2 — issuing policies and changing status. Needs Lab 1 (premium calculator) for the new-quote cases."""
+"""Lab 2 — issuing policies and changing status. Needs Lab 1 (premium calculator) for the new-quote cases."""
 import pytest
 
 pytestmark = pytest.mark.lab

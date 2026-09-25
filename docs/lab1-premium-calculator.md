@@ -1,6 +1,6 @@
-# Day 2 · Lab 1 — The quotation calculator
+# Lab 1 — The premium calculator
 
-*45 minutes · `app/services/pricing.py` · tests: `tests/test_pricing.py`, `tests/test_quotes.py`, `tests/test_pages.py`*
+*45 minutes · `app/services/pricing.py` · tests: `tests/test_lab1_pricing.py`, `tests/test_lab1_quotes.py`, `tests/test_lab1_pages.py`*
 
 ## The problem statement
 
@@ -17,18 +17,18 @@
 >
 > **Acceptance:** Priya Nair (born 25 Aug 1990) · Health Shield (rate 0.03) · ₹5,00,000 · 1 year → **₹15,000.00**. `POST /api/quotes` → 201 / 404 / 422. *Get a quote* screen shows the premium.
 
-The same rules are in the docstring at the top of `pricing.py` — **attach that file to every prompt**. Until this lab is done the quote form and `POST /api/quotes` answer **501 "Day 2, Lab 1: implement calculate_premium"** — that's expected.
+The same rules are in the docstring at the top of `pricing.py` — **attach that file to every prompt**. Until this lab is done the quote form and `POST /api/quotes` answer **501 "Lab 1: implement calculate_premium"** — that's expected.
 
 ## Step 0 — see it fail (2 min)
 
 ```
-pytest tests/test_pricing.py -q      # NotImplementedError everywhere
+pytest tests/test_lab1_pricing.py -q      # NotImplementedError everywhere
 ```
 Browser: *Get a quote* → any values → the 501 message.
 
 ## Part A — one function per prompt (25 min)
 
-After **each** prompt: paste, `pytest tests/test_pricing.py -q`, read the function aloud.
+After **each** prompt: paste, `pytest tests/test_lab1_pricing.py -q`, read the function aloud.
 
 **A1 · `age_factor`** — 📎 `#file:app/services/pricing.py`
 ```
@@ -63,7 +63,7 @@ if max given and sum_insured > it -> PricingError(f"Sum insured cannot exceed {m
 premium = sum_insured * base_rate * age_factor(age, product) * tenure_factor(tenure_years) * add_on_factor(product, add_ons or []);
 return round(max(premium, MIN_PREMIUM), 2).
 ```
-🔍 by hand: 5,00,000 × 0.03 × 1.0 × 1.0 = **15,000.0**. `pytest tests/test_pricing.py` → all green.
+🔍 by hand: 5,00,000 × 0.03 × 1.0 × 1.0 = **15,000.0**. `pytest tests/test_lab1_pricing.py` → all green.
 ⚠️ rounds before the minimum · returns `int` · crashes on `add_ons=None`.
 
 ### The code you should end up with
@@ -135,7 +135,7 @@ def calculate_premium(
 
 ## Part B — prove it end to end (10 min)
 
-1. `pytest tests/test_pricing.py tests/test_quotes.py -q` → green (quotes API needs no code change — it already calls your calculator).
+1. `pytest tests/test_lab1_pricing.py tests/test_lab1_quotes.py -q` → green (quotes API needs no code change — it already calls your calculator).
 2. Browser: *Get a quote* → Priya Nair · Health Shield · 500000 · 1 year → **₹15,000.00** → the quote page. *Quotes* in the nav lists it as **Open**.
 3. Swagger: `POST /api/quotes` with `tenure_years: 4` → **422** with a readable message; `customer_id: 99` → **404**.
 4. Ask the AI for trouble: `Give me 5 inputs where calculate_premium could still be wrong, with expected vs actual.` Turn one into a test.
@@ -148,6 +148,6 @@ Review against this checklist, report only problems: 1. any <= where the rule sa
 3. any import not in requirements.txt? 4. add-ons added, not multiplied? 5. does every error path raise PricingError with a message a user could read?
 ```
 ```
-git add -A && git commit -m "Day 2 Lab 1: quotation calculator" && git push
+git add -A && git commit -m "Lab 1: quotation calculator" && git push
 ```
-Actions tab → green. **Done when:** `pytest tests/test_pricing.py tests/test_quotes.py tests/test_pages.py` green · ₹15,000.00 on screen · one AI mistake logged.
+Actions tab → green. **Done when:** `pytest tests/test_lab1_pricing.py tests/test_lab1_quotes.py tests/test_lab1_pages.py` green · ₹15,000.00 on screen · one AI mistake logged.

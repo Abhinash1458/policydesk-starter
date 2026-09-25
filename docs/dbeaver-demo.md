@@ -1,6 +1,6 @@
 # Look inside the database — DBeaver demo (5 min)
 
-*Use right after Phase 2, Example 3 — the moment the `claim` table appears.*
+*Use right after Lab 3, Step 3 — the moment the `claim` table appears.*
 
 **The point:** the app is just Python writing rows into tables. When you `POST /api/claims`, `session.commit()` in
 `file_claim()` inserts one row into `claim`. Nothing magic — and you can see it.

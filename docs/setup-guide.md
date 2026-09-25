@@ -6,7 +6,7 @@ Do all of this **before the workshop**. It takes about 60–90 minutes on a norm
 
 | | |
 |---|---|
-| **Timing** | One session of 80 minutes: 25 min explore · 30 min guided prompts · 25 min your own prompt |
+| **Workshop** | Setup & explore · Lab 1 premium calculator · Lab 2 issue policy · Lab 3 claim form · Lab 4 approve / reject · deployment · take-home assignment |
 | **Before the workshop** | Complete every step and bring the `check_setup.py` output (or a screenshot) with you |
 | **Platforms** | Windows 10/11 (primary), macOS 12+, Ubuntu 22.04/24.04 |
 | **Cost** | Everything in this guide is free — no credit card is needed anywhere |

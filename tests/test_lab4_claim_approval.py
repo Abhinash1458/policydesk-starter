@@ -1,6 +1,7 @@
-"""Phase 3 — admin approval: review queue and status workflow. Acceptance tests for YOUR prompt.
+"""Lab 4 — approve / reject: the review workflow API and the Approve / Reject buttons on the Claims page.
 
-These are the acceptance tests for the feature you build with your OWN prompt. They fail until it is done.
+Part A (6 tests): the API you build with your OWN prompt. Part B (2 tests): the buttons on the Claims page.
+They fail until each part is done. Needs Lab 3 (claims are filed through POST /api/claims).
 """
 import pytest
 
@@ -62,8 +63,45 @@ def test_admin_queue_filters_by_status(client, health_policy):
     assert [c["id"] for c in client.get("/api/claims", params={"status": "Under Review"}).json()] == [b["id"]]
 
 
-def test_reason_is_stored_with_decision(client, health_policy):
+def test_reason_is_stored_and_kept_when_a_later_move_has_none(client, health_policy):
     c = client.post("/api/claims", json=claim_for(health_policy)).json()
     r = client.patch(f"/api/claims/{c['id']}/status", json={"status": "Rejected", "reason": "Pre-existing condition"})
     assert r.status_code == 200 and r.json()["reason"] == "Pre-existing condition"
     assert client.get(f"/api/claims/{c['id']}").json()["status"] == "Rejected"
+
+    d = client.post("/api/claims", json=claim_for(health_policy, amount=10000)).json()
+    client.patch(f"/api/claims/{d['id']}/status", json={"status": "Under Review", "reason": "Bills requested"})
+    r = client.patch(f"/api/claims/{d['id']}/status", json={"status": "Approved"})          # no reason this time
+    assert r.json()["reason"] == "Bills requested"
+
+
+# ---- Part B: the buttons on the Claims page ----------------------------------------
+
+def test_claims_page_shows_only_the_allowed_buttons(client, health_policy):
+    cid = client.post("/api/claims", json=claim_for(health_policy)).json()["id"]
+    page = client.get("/claims").text
+    assert f'action="/claims/{cid}/status"' in page
+    assert 'value="Under Review"' in page and 'value="Rejected"' in page and 'value="Approved"' not in page
+
+    client.patch(f"/api/claims/{cid}/status", json={"status": "Under Review"})
+    page = client.get("/claims").text
+    assert 'value="Approved"' in page and 'value="Under Review"' not in page
+
+    client.patch(f"/api/claims/{cid}/status", json={"status": "Approved"})
+    page = client.get("/claims").text
+    assert f'action="/claims/{cid}/status"' not in page and "Final" in page
+
+
+def test_claims_page_buttons_move_the_claim_and_explain_refusals(client, health_policy):
+    cid = client.post("/api/claims", json=claim_for(health_policy)).json()["id"]
+
+    r = client.post(f"/claims/{cid}/status", data={"status": "Approved"}, follow_redirects=False)  # skips review
+    assert r.status_code == 303 and "error=" in r.headers["location"]
+    assert "alert--bad" in client.get(r.headers["location"]).text
+    assert client.get(f"/api/claims/{cid}").json()["status"] == "Filed"
+
+    r = client.post(f"/claims/{cid}/status", data={"status": "Under Review", "reason": ""}, follow_redirects=False)
+    assert r.status_code == 303 and "flash=" in r.headers["location"]
+    client.post(f"/claims/{cid}/status", data={"status": "Approved", "reason": "Bills verified"})
+    assert client.get(f"/api/claims/{cid}").json()["status"] == "Approved"
+    assert "Bills verified" in client.get("/claims").text

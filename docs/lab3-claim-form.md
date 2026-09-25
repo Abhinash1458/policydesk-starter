@@ -1,14 +1,28 @@
-# Phase 2 — Four prompts with actual code outputs
+# Lab 3 — Claim form: file a claim against a policy
 
-*Day 1 · 30 minutes · do them in order · commit after each*
+*50 minutes · five prompts, in order · commit after each*
 
-How to read each example: 📎 attach these files in Copilot Chat (`#file:`) · 💬 paste the prompt · **Output** — the code you should end up with (compare line by line; AI wording may differ, behaviour must not) · ▶ run · 🔍 check · ⚠️ what AI usually gets wrong.
+Labs 1 and 2 gave you empty functions to fill in. This lab starts from **nothing**: there is no `Claim` table, no claims API
+and no claims screen in the starter. You build all of it with five prompts, and finish with a **File a claim** form that any
+customer-service agent could use.
+
+| Step | Min | You build | File |
+|---|---|---|---|
+| 1 | 6 | the **Claim model** | `app/models.py` |
+| 2 | 10 | the **claim endpoints** with the four business rules | `app/routers/claims.py` (new) |
+| 3 | 6 | the **database table** + register the router | `app/main.py`, `app/init_db.py` (new) |
+| 4 | 8 | the **Claims page** (list + status tabs) | `app/routers/pages.py`, `app/templates/claims.html` (new), nav link |
+| 5 | 12 | the **File a claim form** | `app/routers/pages.py`, `app/templates/claim_form.html` (new), `claims.html` |
+
+Acceptance tests: `pytest tests/test_lab3_claims.py -v` — **all red now**, all green when you finish Step 5.
+
+How to read each step: 📎 attach these files in Copilot Chat (`#file:`) · 💬 paste the prompt · **Output** — the code you should end up with (compare line by line; AI wording may differ, behaviour must not) · ▶ run · 🔍 check · ⚠️ what AI usually gets wrong.
 
 > Tip: in Copilot Chat, `#file:app/models.py` attaches the file. In ChatGPT/Claude/Gemini you paste the file yourself.
 
 ---
 
-## Example 1 — Add the Claim model to `app/models.py` (6 min)
+## Step 1 — Add the Claim model to `app/models.py` (6 min)
 
 📎 `#file:app/models.py`
 
@@ -83,11 +97,11 @@ class ClaimStatusUpdate(SQLModel):
 🔍 prints `claim [<ClaimStatus.FILED: 'Filed'>, …]`. Also `pytest -m "not lab"` still 15 passed (nothing existing broke).
 ⚠️ AI puts `Claim` **before** `Policy` (then `Policy` is undefined in the type hint — use the string `"Claim"` on Policy's side as shown) · forgets the `claims` relationship on `Policy` · invents `Field(sa_column=...)`.
 
-**Commit:** `git commit -am "Phase 2.1: Claim model"`
+**Commit:** `git commit -am "Lab 3.1: Claim model"`
 
 ---
 
-## Example 2 — Add the claim endpoints in a new `app/routers/claims.py` (10 min)
+## Step 2 — Add the claim endpoints in a new `app/routers/claims.py` (10 min)
 
 Business rules (put them in your prompt — never assume AI knows them):
 
@@ -117,7 +131,7 @@ TASK: create app/routers/claims.py with router = APIRouter(prefix="/api/claims",
  - GET ""  list_claims(policy_id: int | None = None, status: ClaimStatus | None = None) -> list[ClaimRead], newest first, both filters optional
  - POST "" create_claim(payload) -> ClaimRead, status_code=201, calls file_claim
  - GET "/{claim_id}" -> 404 if missing
-CONSTRAINTS: imports only from fastapi, sqlmodel, app.db, app.models. Same error style as policies.py. No PATCH endpoint yet (that is Phase 3).
+CONSTRAINTS: imports only from fastapi, sqlmodel, app.db, app.models. Same error style as policies.py. No PATCH endpoint yet (that is Lab 4).
 FORMAT: the complete file.
 ```
 
@@ -210,14 +224,14 @@ def get_claim(claim_id: int, session: Session = Depends(get_session)):
 ```
 
 ▶ `python -c "import app.routers.claims; print('ok')"`
-🔍 prints `ok`. The endpoints are not live yet — that's Example 3.
+🔍 prints `ok`. The endpoints are not live yet — that's Step 3.
 ⚠️ `start < incident < end` (exclusive — the rule is inclusive) · counts *all* claims in remaining cover instead of Approved only · raises 422 for a cancelled policy instead of saving it as Rejected · imports `dateutil` or `pydantic.validator` (not needed).
 
-**Commit:** `git add app/routers/claims.py && git commit -m "Phase 2.2: claim endpoints"`
+**Commit:** `git add app/routers/claims.py && git commit -m "Lab 3.2: claim endpoints"`
 
 ---
 
-## Example 3 — Create the database tables and register the router (6 min)
+## Step 3 — Create the database tables and register the router (6 min)
 
 Two things must happen before `/api/claims` works: FastAPI must know the router, and SQLite must have a `claim` table. `SQLModel.metadata.create_all` creates any **missing** table; it never alters existing ones — which is exactly what we need here.
 
@@ -285,21 +299,21 @@ if __name__ == "__main__":
 ```
 Database: sqlite:///./policydesk.db
   claim        0 rows
-  customer     2 rows
-  policy       2 rows
+  customer     2 rows      (more if you added customers)
+  policy       2 rows      (more if you issued policies in Lab 2)
   product      3 rows
-  quote        2 rows
+  quote        2 rows      (more if you created quotes in Lab 1)
 ```
-▶ `pytest tests/test_claims.py -q` → **8 passed**. Restart `uvicorn`; `/docs` now shows the *claims* section. Try it: `POST /api/claims` with `{"policy_id": 1, "amount": 50000, "description": "Hospitalised for three days", "incident_date": "2026-03-10"}` → **201**, status `Filed`. Open `policydesk.db` in DBeaver (`docs/dbeaver-demo.md`) — the row is there.
+▶ `pytest tests/test_lab3_claims.py -q` → the **8 API tests pass**; the 3 form tests stay red until Step 5. Restart `uvicorn`; `/docs` now shows the *claims* section. Try it: `POST /api/claims` with `{"policy_id": 1, "amount": 50000, "description": "Hospitalised for three days", "incident_date": "2026-03-10"}` → **201**, status `Filed`. Open `policydesk.db` in DBeaver (`docs/dbeaver-demo.md`) — the row is there.
 ⚠️ AI adds `create_all` calls into `models.py` or wants Alembic — not needed · forgets `if __name__ == "__main__"` · uses `DATABASE_URL.replace("sqlite:///", "")` which breaks on `sqlite:////tmp/…` (four slashes).
 
-**Commit:** `git add -A && git commit -m "Phase 2.3: register claims router, init_db"`
+**Commit:** `git add -A && git commit -m "Lab 3.3: register claims router, init_db"`
 
 ---
 
-## Example 4 — Add the Claims page (8 min)
+## Step 4 — Add the Claims page (8 min)
 
-The API works; now give the claims officer a screen. This example shows AI generating **UI** from an existing template — the pattern is "copy the style of page X".
+The API works; now give the claims officer a screen. This step shows AI generating **UI** from an existing template — the pattern is "copy the style of page X".
 
 📎 `#file:app/routers/pages.py` `#file:app/templates/policies.html` `#file:app/templates/_macros.html` `#file:app/templates/base.html`
 
@@ -401,16 +415,263 @@ def claims_list(request: Request, status: str | None = None, session: Session = 
 ```
 
 ▶ Restart `uvicorn` (templates reload; new routes need a restart) → http://127.0.0.1:8000/claims
-🔍 The claim you filed in Example 3 is listed with a **Filed** pill; the *Filed* tab shows it, the *Approved* tab shows the empty state. The `pill` macro colours the status automatically. `pytest -m "not lab"` still green.
+🔍 The claim you filed in Step 3 is listed with a **Filed** pill; the *Filed* tab shows it, the *Approved* tab shows the empty state. The `pill` macro colours the status automatically. `pytest -m "not lab"` still green.
 ⚠️ AI writes `c.customer.name` (Claim has no customer — go through `c.policy.customer`) · forgets the `ClaimStatus` global, so the tabs loop crashes with `UndefinedError` · invents CSS classes that don't exist in `theme.css`.
 
-**Commit:** `git add -A && git commit -m "Phase 2.4: claims page"` then `git push`.
+**Commit:** `git add -A && git commit -m "Lab 3.4: claims page"`
 
 ---
 
-## End of Phase 2 — checklist
+## Step 5 — Add the File a claim form (12 min)
 
-- [ ] `pytest -m "not lab"` green; `pytest tests/test_claims.py` → 8 passed (the remaining `lab` tests are Phase 3 and Day 2)
-- [ ] `/docs` lists customers, products, quotes, policies, **claims** · the **Claims** page is in the nav
-- [ ] Four commits on your fork, pushed; the Actions tab shows a green run
-- [ ] You can explain every function you committed
+The API refuses bad claims; now a person needs a form to file good ones. The pattern is the one the starter already uses
+for quotes: **GET shows the form, POST validates and either redirects on success or re-renders the form with the error**.
+The form must call the **same `file_claim`** as the API — business rules live in one place only.
+
+📎 `#file:app/routers/pages.py` `#file:app/templates/quote.html` `#file:app/templates/claims.html` `#file:app/routers/claims.py`
+
+💬
+```
+ROLE: senior FastAPI + Jinja2 engineer. CONTEXT: pages.py has the /claims list and a quote form (quote_form / quote_submit) — copy
+that pattern exactly. claims.py has file_claim(payload, session), which raises HTTPException (404 / 422) when a rule is broken.
+TASK, three parts:
+ 1. In app/routers/pages.py
+    - imports: add ClaimCreate to the app.models import, `from app.routers.claims import file_claim`, `from pydantic import ValidationError`
+    - change claims_list so it ALSO passes flash=request.query_params.get("flash") and error=request.query_params.get("error")
+    - helper active_policies(session) -> the Active policies ordered by policy_number
+    - GET "/claims/new" -> claim_form(request, policy_id: int | None = None, session) renders "claim_form.html"
+      with policies=active_policies(session) and form={"policy_id": policy_id}
+    - POST "/claims/new" -> claim_submit(request, policy_id, amount, incident_date: date, description,
+      vehicle_registration: str = "", session) — every field is a Form(...). Keep the typed values in a form dict.
+      Build ClaimCreate (vehicle_registration stripped and upper-cased, "" becomes None) and call file_claim.
+      pydantic ValidationError -> error = exc.errors()[0]["msg"];  HTTPException -> error = exc.detail.
+      On error re-render claim_form.html with policies, form and error. On success redirect (303) to
+      /claims?flash=Claim+<id>+<status value>
+ 2. Create app/templates/claim_form.html in the style of quote.html: page-head (eyebrow "Claims", h1 File a <span class="hl">claim</span>),
+    a card with {{ alerts(error=error) }} and <form class="form" method="post" action="/claims/new"> containing:
+    policy_id select (required; option text "policy number · customer name · product name"; selected when form.policy_id == p.id),
+    amount (number, min 1, step 100, required), incident_date (date, default today(), required),
+    description (textarea, minlength 5, maxlength 500, required), vehicle_registration (text, hint "Motor policies only"),
+    and form__actions with "File claim →" (btn--primary) and Cancel (btn--ghost, href /claims).
+    Keep typed values on re-render (value="{{ form.amount or '' }}" etc.).
+ 3. claims.html: import alerts as well as pill, show {{ alerts(flash=flash, error=error) }} above the tabs, and replace the
+    "Browse policies" button with <a class="btn btn--primary" href="/claims/new">File a claim</a>.
+CONSTRAINTS: existing CSS classes only, no JavaScript, do NOT change file_claim.
+FORMAT: the pages.py code, the complete claim_form.html, the complete claims.html.
+```
+
+**Output** — `app/routers/pages.py`, new imports:
+
+```python
+from pydantic import ValidationError                  # with the other third-party imports
+
+from app.models import (                              # add ClaimCreate to the existing list
+    Claim,
+    ClaimCreate,
+    ClaimStatus,
+    ...
+)
+from app.routers.claims import file_claim             # next to the other app.routers imports
+```
+
+**Output** — `claims_list` now passes the messages to the page:
+
+```python
+@router.get("/claims", response_class=HTMLResponse)
+def claims_list(request: Request, status: str | None = None, session: Session = Depends(get_session)):
+    stmt = select(Claim).order_by(Claim.created_at.desc())
+    if status:
+        stmt = stmt.where(Claim.status == status)
+    return render(
+        request,
+        "claims.html",
+        claims=session.exec(stmt).all(),
+        status=status,
+        flash=request.query_params.get("flash"),
+        error=request.query_params.get("error"),
+    )
+```
+
+**Output** — the form routes (end of `pages.py`, in the Claims section):
+
+```python
+def active_policies(session: Session) -> list[Policy]:
+    return session.exec(
+        select(Policy).where(Policy.status == PolicyStatus.ACTIVE).order_by(Policy.policy_number)
+    ).all()
+
+
+@router.get("/claims/new", response_class=HTMLResponse)
+def claim_form(request: Request, policy_id: int | None = None, session: Session = Depends(get_session)):
+    return render(request, "claim_form.html", policies=active_policies(session), form={"policy_id": policy_id})
+
+
+@router.post("/claims/new", response_class=HTMLResponse)
+def claim_submit(
+    request: Request,
+    policy_id: int = Form(...),
+    amount: float = Form(...),
+    incident_date: date = Form(...),
+    description: str = Form(...),
+    vehicle_registration: str = Form(""),
+    session: Session = Depends(get_session),
+):
+    form = {
+        "policy_id": policy_id,
+        "amount": amount,
+        "incident_date": incident_date,
+        "description": description,
+        "vehicle_registration": vehicle_registration,
+    }
+    try:
+        claim = file_claim(
+            ClaimCreate(
+                policy_id=policy_id,
+                amount=amount,
+                incident_date=incident_date,
+                description=description,
+                vehicle_registration=vehicle_registration.strip().upper() or None,
+            ),
+            session,
+        )
+    except ValidationError as exc:  # a field broke the model rules, e.g. description too short
+        error = exc.errors()[0]["msg"]
+    except HTTPException as exc:  # a business rule refused the claim (404 / 422)
+        error = exc.detail
+    else:
+        return RedirectResponse(f"/claims?flash=Claim+{claim.id}+{claim.status.value}", status_code=303)
+    return render(request, "claim_form.html", policies=active_policies(session), form=form, error=error)
+```
+
+**Output** — `app/templates/claim_form.html`:
+
+```html
+{% extends "base.html" %}
+{% from "_macros.html" import alerts %}
+{% block title %}File a claim{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <div>
+      <span class="eyebrow">Claims</span>
+      <h1>File a <span class="hl">claim</span></h1>
+      <p>Pick an Active policy and describe what happened. The same rules as <span class="mono">POST /api/claims</span> apply.</p>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="card">
+      {{ alerts(error=error) }}
+      <form class="form" method="post" action="/claims/new">
+        <div class="field">
+          <label for="policy_id">Policy</label>
+          <select name="policy_id" id="policy_id" required>
+            <option value="" disabled {{ 'selected' if not form.policy_id }}>Select a policy…</option>
+            {% for p in policies %}
+            <option value="{{ p.id }}" {{ 'selected' if form.policy_id == p.id }}>{{ p.policy_number }} · {{ p.customer.name }} · {{ p.product.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form__row">
+          <div class="field">
+            <label for="amount">Claim amount (₹)</label>
+            <input type="number" name="amount" id="amount" min="1" step="100" value="{{ form.amount or '' }}" required>
+          </div>
+          <div class="field">
+            <label for="incident_date">Incident date</label>
+            <input type="date" name="incident_date" id="incident_date" value="{{ form.incident_date or today().isoformat() }}" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="description">What happened?</label>
+          <textarea name="description" id="description" rows="3" minlength="5" maxlength="500" required>{{ form.description or '' }}</textarea>
+        </div>
+        <div class="field">
+          <label for="vehicle_registration">Vehicle registration</label>
+          <input type="text" name="vehicle_registration" id="vehicle_registration" value="{{ form.vehicle_registration or '' }}">
+          <span class="hint">Motor policies only.</span>
+        </div>
+        <div class="form__actions">
+          <button class="btn btn--primary" type="submit">File claim →</button>
+          <a class="btn btn--ghost" href="/claims">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
+```
+
+**Output** — `app/templates/claims.html` (the top changes; the table is the same as Step 4):
+
+```html
+{% extends "base.html" %}
+{% from "_macros.html" import pill, alerts %}
+{% block title %}Claims{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <div>
+      <span class="eyebrow">Claims</span>
+      <h1>Claim <span class="hl">status</span></h1>
+      <p>{{ claims | length }} shown{% if status %} · filtered by {{ status }}{% endif %}.</p>
+    </div>
+    <a class="btn btn--primary" href="/claims/new">File a claim</a>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    {{ alerts(flash=flash, error=error) }}
+    <div class="tabs">
+      <a href="/claims" class="{{ 'on' if not status }}">All</a>
+      {% for s in ClaimStatus %}<a href="/claims?status={{ s.value }}" class="{{ 'on' if status == s.value }}">{{ s.value }}</a>{% endfor %}
+    </div>
+    <div class="card" style="padding:0">
+      {% if claims %}
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Policy</th><th>Customer</th><th>Incident</th><th>Description</th><th class="num">Amount</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for c in claims %}
+          <tr>
+            <td class="mono">{{ c.id }}</td>
+            <td><a class="mono" href="/policies/{{ c.policy_id }}">{{ c.policy.policy_number }}</a></td>
+            <td><a href="/customers/{{ c.policy.customer_id }}">{{ c.policy.customer.name }}</a></td>
+            <td class="small">{{ c.incident_date.strftime('%d %b %Y') }}</td>
+            <td class="small">{{ c.description }}{% if c.reason %}<br><span class="muted">Reason: {{ c.reason }}</span>{% endif %}</td>
+            <td class="num">{{ c.amount | money }}</td>
+            <td>{{ pill(c.status) }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+      {% else %}
+      <div class="empty">No claims{% if status %} with status {{ status }}{% endif %}.</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+```
+
+▶ Restart `uvicorn` → http://127.0.0.1:8000/claims → **File a claim**
+🔍 Try all three outcomes:
+- a good Health claim (₹25,000, a date in 2026) → back on the Claims page with a green **"Claim … Filed"** banner
+- the same claim dated **2027-02-01** → the form comes back with the red *"Incident date must fall within the policy period…"* message and **your typed values still filled in**
+- a Motor claim without a vehicle number → *"Motor claims need a vehicle registration number"*
+
+▶ `pytest tests/test_lab3_claims.py -v` → **11 passed**.
+⚠️ AI writes its own validation in the form route (duplicate rules that drift from the API — delete them, call `file_claim`) · catches only `HTTPException`, so a 3-letter description crashes with a 500 (`ValidationError` must be caught too) · redirects with `status_code=302` (use **303** after a POST) · forgets to keep the typed values, so one mistake means retyping everything.
+
+**Commit:** `git add -A && git commit -m "Lab 3.5: File a claim form"` then `git push`.
+
+---
+
+## End of Lab 3 — checklist
+
+- [ ] `pytest tests/test_lab3_claims.py` → **11 passed** · `pytest -m "not lab"` still green
+- [ ] `/docs` lists the *claims* section · the **Claims** page is in the nav · **File a claim** works and shows rule errors in red
+- [ ] Five commits on your fork, pushed; the Actions tab shows a green run
+- [ ] You can explain every function you committed — especially why the form calls `file_claim` instead of re-checking the rules

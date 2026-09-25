@@ -1,7 +1,7 @@
 """Seed data loaded on first start: products and customers from data/*.csv, plus two ready-made policies.
 
 The two policies exist so that claims can be filed and reviewed even before the premium calculator
-(Day 2, Lab 1) and issue_policy (Day 2, Lab 2) are implemented. Their premiums are the values the calculator will produce.
+(Lab 1) and issue_policy (Lab 2) are implemented. Their premiums are the values the calculator will produce.
 """
 import csv
 from datetime import date, timedelta

@@ -1,4 +1,4 @@
-"""Day 2, Lab 1 — quotes API. Needs the premium calculator."""
+"""Lab 1 — quotes API. Needs the premium calculator."""
 import pytest
 
 pytestmark = pytest.mark.lab

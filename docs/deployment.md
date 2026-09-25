@@ -1,4 +1,4 @@
-# Day 2 · second half — Deployment pipeline (30 min)
+# Deployment pipeline (30 min)
 
 *Branch → push → pull request → merge → Vercel deploys. That's the whole thing.*
 

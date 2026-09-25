@@ -4,14 +4,15 @@
 
 ## The session in one line each
 
-| Day · session | Min | You | Done when |
+| Session | Min | You build with prompts | Done when |
 |---|---|---|---|
-| 1 · Phase 1 Fork & explore | 25 | fork → clone → run → 3 read-the-code prompts | app on :8000, `pytest -m "not lab"` = 15 passed, 1 commit |
-| 1 · Phase 2 Four prompts | 30 | Claim model → claim endpoints → DB tables → Claims page | `pytest tests/test_claims.py` = 8 passed, 4 commits |
-| 1 · Phase 3 Your prompt | 25 | admin approval workflow, prompt written by you | `pytest tests/test_claims_admin.py` = 6 passed, pushed |
-| 2 · Lab 1 Quotation | 45 | four premium functions in `pricing.py` | pricing + quotes tests green, ₹15,000.00 on screen |
-| 2 · Lab 2 Issue policy | 45 | `issue_policy` + `update_policy_status` | `pytest` = 80 passed |
-| 2 · Deployment | 30 | branch → push → PR to upstream `main` → merge → Vercel | live `/health` |
+| 0 · Setup & explore | 30 | fork → clone → `setup.bat` → 3 read-the-code prompts | app on :8000, `pytest -m "not lab"` = 15 passed, 1 commit |
+| Lab 1 · Premium calculator | 45 | four premium functions in `pricing.py` | `tests/test_lab1_*.py` green, ₹15,000.00 on screen |
+| Lab 2 · Issue a policy | 45 | `issue_policy` + `update_policy_status` | `tests/test_lab2_policies.py` = 8 passed |
+| Lab 3 · Claim form | 50 | Claim model → claims API → Claims page → File a claim form | `tests/test_lab3_claims.py` = 11 passed, 5 commits |
+| Lab 4 · Approve / reject | 45 | review workflow (your prompt) + Approve / Reject buttons | `tests/test_lab4_claim_approval.py` = 8 passed, pushed |
+| Deployment | 30 | branch → push → PR to upstream `main` → merge → Vercel | live `/health` |
+| Assignment (home) | 60–90 | renewal quote with a no-claim bonus | `pytest -m assignment` = 6 passed |
 
 ## Commands
 
@@ -19,11 +20,12 @@
 .venv\Scripts\activate                      # macOS/Linux: source .venv/bin/activate
 uvicorn app.main:app --reload               # http://127.0.0.1:8000  ·  API docs: /docs
 pytest -m "not lab"                         # what CI runs — must stay green
-pytest tests/test_claims.py -v              # one file, verbose
-pytest                                      # everything (80 at the end)
+pytest tests/test_lab3_claims.py -v         # one lab's tests, verbose
+pytest -m "not assignment"                  # everything from the four labs
+pytest -m assignment                        # the take-home assignment
 python -m app.init_db                       # create missing tables + seed, list tables
 git add -A && git commit -m "..." && git push
-git checkout -b team-<name>-claims && git push -u origin team-<name>-claims   # Day 2: branch for the PR
+git checkout -b team-<name>-claims && git push -u origin team-<name>-claims   # deployment: branch for the PR
 ```
 
 ## The prompt pattern (every time)
@@ -56,10 +58,10 @@ FORMAT      "Only the function" / "The complete file".
 | DB connection | `app/db.py` (`DATABASE_URL`; the file is `policydesk.db`) |
 | Seed data | `app/seed.py`, `data/*.csv` |
 | Test fixtures (`client`, `ids`, `health_policy`, `motor_policy`) | `tests/conftest.py` |
-| The four Phase 2 prompts + outputs | `docs/phase2-prompts.md` |
-| Phase 3 brief + acceptance tests | `docs/phase3-admin-approval.md`, `tests/test_claims_admin.py` |
-| Day 2 labs | `docs/day2-lab1-quotation.md`, `docs/day2-lab2-issue-policy.md` |
-| Deployment steps | `docs/day2-deployment.md` |
+| Lab guides (prompts + expected code) | `docs/lab1-premium-calculator.md`, `docs/lab2-issue-policy.md`, `docs/lab3-claim-form.md`, `docs/lab4-claim-approval.md` |
+| Acceptance tests per lab | `tests/test_lab1_*.py` · `test_lab2_policies.py` · `test_lab3_claims.py` · `test_lab4_claim_approval.py` |
+| Assignment brief + tests | `docs/assignment-renewal.md`, `tests/test_assignment_renewal.py` |
+| Deployment steps | `docs/deployment.md` |
 | Git steps | `docs/git-workflow.md` |
 
 Seeded data: customers **Priya Nair** (id 1, Health policy `PD-HEALTH-2026-00001`, ₹5,00,000, 2026-01-01 → 2026-12-31) and **Rohan Das** (id 2, Motor policy `PD-MOTOR-2026-00002`, ₹8,00,000, vehicle `TS09AB1234`, 2026-03-01 → 2028-02-28).
@@ -75,22 +77,24 @@ Seeded data: customers **Priya Nair** (id 1, Health policy `PD-HEALTH-2026-00001
 | `'python' is not recognized` / opens Microsoft Store | reinstall Python with *Add to PATH* ticked, or use `py -3.12`; Settings → App execution aliases → turn off `python` |
 | `Activate.ps1 cannot be loaded` | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, or use `.venv\Scripts\activate.bat` |
 | `uvicorn: address already in use` | an old server is running — `Ctrl+C` there, or `--port 8001` |
-| **501 "Day 2, Lab 1: implement calculate_premium"** on the quote form | expected until Day 2 Lab 1 |
-| **501 "Day 2, Lab 2: implement issue_policy"** on a quote page | expected until Day 2 Lab 2 |
+| **501 "Lab 1: implement calculate_premium"** on the quote form | expected until Lab 1 is done |
+| **501 "Lab 2: implement issue_policy"** on a quote page | expected until Lab 2 is done |
 | `end_date` is 1 Jan instead of 31 Dec | missing the −1 day in `issue_policy` |
 | `age_factor(25, MOTOR)` returns 1.2 | `<= 25` — should be `< 25` |
-| `/api/claims` → 404 Not Found | router not registered — Example 3 (`include_router` in `main.py`); restart uvicorn |
+| `/api/claims` → 404 Not Found | router not registered — Lab 3, Step 3 (`include_router` in `main.py`); restart uvicorn |
 | `sqlite3.OperationalError: no such table: claim` | run `python -m app.init_db` (or delete `policydesk.db` and restart) |
-| `ImportError: cannot import name 'Claim'` | Example 1 not saved, or `Claim` defined *after* it's used — check `models.py` order |
+| `ImportError: cannot import name 'Claim'` | Lab 3, Step 1 not saved, or `Claim` defined *after* it's used — check `models.py` order |
 | `NameError: name 'Policy' is not defined` in models.py | `Claim` placed above `Policy` — move it to the end of the file |
 | `pytest` → `No module named 'app'` | run from the repo root (where `pyproject.toml` is), or use `python -m pytest` |
 | Test fails with `409` where you expected `200` | your transition table is too strict — read `ALLOWED_TRANSITIONS` you wrote |
 | Test fails with `200` where you expected `409` | too loose — Filed → Approved must be refused; finals have no moves |
-| `test_approved_claims_reduce_remaining_cover` fails | remaining cover must count **Approved** claims only |
+| `test_approved_claims_reduce_remaining_cover` fails (Lab 4) | remaining cover must count **Approved** claims only |
 | Copilot: "You've reached your monthly limit" | pair with a teammate's account for the session |
 | `git push` → permission denied to `Abhinash1458/...` | you cloned the original — `git remote set-url origin https://github.com/<you>/policydesk-starter.git` |
 | Actions tab empty on the fork | Settings → Actions → General → Allow all actions, then enable in the Actions tab |
 | `TemplateNotFound` | template file name in `render(...)` doesn't match a file in `app/templates/` |
+| File a claim form → **500** on a short description | the route catches only `HTTPException` — catch pydantic `ValidationError` too (Lab 3, Step 5) |
+| Approve / Reject button → **422** | the buttons are missing `name="status"` (Lab 4, Part B) |
 
 ## What the AI got wrong today (fill in — 3 rows minimum)
 

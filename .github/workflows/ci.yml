@@ -3,12 +3,12 @@
 #   smoke (2 tests)  ──►  regression (all)  ──►  deploy-render (main)
 #                                          └──►  deploy-vercel (main, Vercel CLI)
 #
-# Day 2 deployment session: students push to a branch on their fork, one team opens a PR against upstream `main`,
+# Deployment session: students push to a branch on their fork, one team opens a PR against upstream `main`,
 # the PR run shows smoke -> regression, the instructor merges, the push to `main` deploys to Vercel.
 #
 # Fails fast: if smoke fails, regression never runs; if regression fails, nothing deploys.
 # Vercel's own git auto-deploy is turned off in vercel.json so this workflow is the only way to ship.
-# Tests marked `lab` (Phase 2 / Phase 3 targets) are excluded, so the pipeline stays green while you build
+# Tests marked `lab` (Lab 1–4 and assignment targets) are excluded, so the pipeline stays green while you build
 # and only turns red if something that already worked breaks.
 
 name: CI/CD
